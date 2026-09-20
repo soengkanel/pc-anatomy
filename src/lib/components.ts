@@ -20,6 +20,13 @@ export type ComponentInfo = {
   specs: SpecRow[];
   functions: string[];
   issues: string[];
+  // Why the component matters and when a student would need to think about it
+  // (e.g. buying, upgrading, or spec'ing a build). Displayed in the "Why & When"
+  // tab of the detail panel.
+  whyWhen: {
+    why: string;
+    when: string[];
+  };
   focus: {
     at: [number, number, number];
     from: [number, number, number];
@@ -69,6 +76,16 @@ export const COMPONENTS: ComponentInfo[] = [
       "Standoff misalignment shorting the motherboard.",
       "Insufficient clearance for oversized GPUs or coolers.",
     ],
+    whyWhen: {
+      why:
+        "The case is the skeleton and shield of the whole PC. Without it every part would sit exposed to dust, static, and knocks — and there would be nothing to mount the motherboard, drives, and fans together in one airflow path.",
+      when: [
+        "Building a new PC from parts.",
+        "Upgrading to a bigger motherboard (ATX) or a longer GPU that doesn't fit the old case.",
+        "You want a quieter build or better airflow for a hot CPU/GPU.",
+        "The current case has no room for extra drives, fans, or a radiator.",
+      ],
+    },
     focus: { at: [0, 0, 0], from: [0, 0.45, 3.4] },
     model: SYSTEM_UNIT_MODEL,
     credits:
@@ -109,6 +126,16 @@ export const COMPONENTS: ComponentInfo[] = [
       "Degraded or incorrectly applied thermal paste.",
       "Silicon degradation from excessive overclocking voltages.",
     ],
+    whyWhen: {
+      why:
+        "The CPU decides how fast every task on the computer runs. Every keystroke, click, calculation, and app instruction flows through it — a slow CPU means the whole PC feels sluggish no matter what other parts are upgraded.",
+      when: [
+        "Apps take a long time to open, compile, or export.",
+        "You want higher FPS in CPU-bound games (strategy, simulation, MMO).",
+        "You do video editing, 3D rendering, or run virtual machines.",
+        "The motherboard supports a much newer CPU generation.",
+      ],
+    },
     focus: { at: [-0.16, 0.3, -0.3], from: [-0.45, 0.55, 1.0] },
     model: "/models/cpu.glb",
     credits:
@@ -149,6 +176,16 @@ export const COMPONENTS: ComponentInfo[] = [
       "Capacitor swelling or VRM overheating on budget boards.",
       "Standoff shorts when the board is mounted incorrectly.",
     ],
+    whyWhen: {
+      why:
+        "The motherboard is the highway system that connects the CPU, RAM, GPU, storage, and every port. It also decides which CPUs will fit, how fast the RAM can run, and how many drives and expansion cards can be installed.",
+      when: [
+        "Upgrading to a new CPU generation with a different socket.",
+        "You need more M.2 slots, USB-C ports, or PCIe lanes.",
+        "The current board doesn't support the RAM speed or Wi-Fi standard you want.",
+        "Building a new PC — pick the motherboard first; everything else plugs into it.",
+      ],
+    },
     focus: { at: [0.0, 0.15, -0.15], from: [0.0, 0.7, 1.15] },
     model: "/models/motherboard.glb",
     credits:
@@ -189,6 +226,16 @@ export const COMPONENTS: ComponentInfo[] = [
       "Failing DIMMs producing random crashes and blue screens.",
       "Dust or corrosion on the gold contacts.",
     ],
+    whyWhen: {
+      why:
+        "RAM is where the CPU keeps everything it is actively working on. Not enough of it and the PC has to swap to slow storage — apps freeze, tabs reload, and games stutter. Faster RAM also lifts CPU performance in gaming.",
+      when: [
+        "Chrome tabs constantly reload or the system feels laggy under load.",
+        "You run VMs, big spreadsheets, Photoshop/video editors, or modern AAA games.",
+        "Task Manager shows memory usage above ~80% while working.",
+        "You want more single-thread performance in games (esp. on AMD Ryzen).",
+      ],
+    },
     focus: { at: [0.22, 0.28, -0.05], from: [0.85, 0.45, 0.55] },
     model: "/models/ram.glb",
     credits:
@@ -229,6 +276,16 @@ export const COMPONENTS: ComponentInfo[] = [
       "Power connector seating failures under high load.",
       "Driver conflicts causing crashes or artifacts.",
     ],
+    whyWhen: {
+      why:
+        "The GPU turns numbers into the pixels you see on screen and does the parallel math for AI and video encoding. For gaming, 3D, ML, or heavy video work it usually matters more than the CPU.",
+      when: [
+        "You want to play modern games at higher settings or higher FPS.",
+        "You do 3D modeling, video editing, or run AI/ML workloads.",
+        "You drive multiple monitors or a high-refresh / 4K display.",
+        "The current card is 2+ generations old and struggles with new titles.",
+      ],
+    },
     focus: { at: [0.0, -0.18, -0.18], from: [0.5, 0.05, 1.0] },
     model: "/models/gpu.glb",
     credits:
@@ -269,6 +326,16 @@ export const COMPONENTS: ComponentInfo[] = [
       "SATA bandwidth capping performance below NVMe.",
       "NAND wear on heavily written budget drives.",
     ],
+    whyWhen: {
+      why:
+        "A SATA SSD makes the whole computer feel modern — boot times, app launches, and file access are 5–10× faster than a spinning hard drive, plus it's silent and shock-resistant.",
+      when: [
+        "You still boot from a mechanical HDD.",
+        "You need more room for the OS, apps, or a growing game library.",
+        "You're upgrading an older PC whose motherboard has no M.2 slot.",
+        "You want a durable drive for a laptop or a PC that travels.",
+      ],
+    },
     focus: { at: [-0.24, -0.28, 0.42], from: [-0.8, -0.3, 1.05] },
     model: "/models/ssd_solid_state_drive.glb",
     credits:
@@ -309,6 +376,16 @@ export const COMPONENTS: ComponentInfo[] = [
       "Bandwidth sharing with the GPU on some boards.",
       "Firmware bugs causing drives to drop offline.",
     ],
+    whyWhen: {
+      why:
+        "An M.2 NVMe SSD is the fastest common storage — up to 25× quicker than a SATA SSD. It plugs straight into the motherboard so there are no cables, and it's the best home for the OS and games with huge worlds.",
+      when: [
+        "Loading massive game maps, video projects, or CAD assemblies.",
+        "Building a clean, cable-free PC.",
+        "Boot and app-launch speed is your top priority.",
+        "The motherboard has an unused M.2 slot doing nothing.",
+      ],
+    },
     focus: { at: [0, 0.1, 0], from: [0, 0.4, 0.9] },
     model: "/models/m.2.glb",
     credits:
@@ -349,6 +426,16 @@ export const COMPONENTS: ComponentInfo[] = [
       "Bad sectors appearing as the platters age.",
       "Vibration degrading performance in multi-drive setups.",
     ],
+    whyWhen: {
+      why:
+        "The HDD is the cheapest way to store a lot of data. It's slow, but for movies, backups, and archives that you rarely open, it costs a fraction of an SSD per terabyte.",
+      when: [
+        "Bulk media storage — movies, music, photo libraries, recordings.",
+        "System backups, NAS drives, or archive volumes.",
+        "Budget builds where every dollar matters.",
+        "Secondary drive so the SSD stays free for the OS and games.",
+      ],
+    },
     focus: { at: [-0.24, -0.28, 0.42], from: [-0.9, -0.25, 1.0] },
     model: "/models/hdd.glb",
     credits:
@@ -389,6 +476,16 @@ export const COMPONENTS: ComponentInfo[] = [
       "Fan bearing noise and dust build-up restricting airflow.",
       "Poor transient response on budget power supplies.",
     ],
+    whyWhen: {
+      why:
+        "Every other component runs on power the PSU delivers. A weak or unreliable PSU causes random shutdowns, damaged hardware, and even fires — it's the one part you should never cheap out on.",
+      when: [
+        "Adding a new GPU that draws more power than the old one.",
+        "Upgrading to a higher-end CPU or planning to overclock.",
+        "The PSU is old, buzzing, or its fan has stopped spinning.",
+        "Building a new PC — pick wattage with 20–30% headroom for future upgrades.",
+      ],
+    },
     focus: { at: [0.12, -0.62, -0.35], from: [0.75, -0.35, 1.05] },
     model: "/models/psu.glb",
     credits:
@@ -429,6 +526,16 @@ export const COMPONENTS: ComponentInfo[] = [
       "Pump failures on liquid coolers causing instant spikes.",
       "Incorrect mounting pressure warping or overheating.",
     ],
+    whyWhen: {
+      why:
+        "The cooler keeps the CPU below the temperature where it starts to throttle (slow itself down to protect itself). A better cooler means sustained speed under long loads and a much quieter PC.",
+      when: [
+        "CPU temperatures cross 85–90 °C under load.",
+        "You want to overclock or use a K/X-series unlocked chip.",
+        "The stock cooler is loud even at idle.",
+        "Building in a hot climate or a small case with limited airflow.",
+      ],
+    },
     focus: { at: [-0.05, 0.42, -0.42], from: [-0.25, 0.95, 0.85] },
     model: "/models/cpu_fan.glb",
     credits:
@@ -469,6 +576,16 @@ export const COMPONENTS: ComponentInfo[] = [
       "Loose screws transferring vibration to the case.",
       "Failing to connect to fan headers, leaving them silent.",
     ],
+    whyWhen: {
+      why:
+        "Case fans move hot air out and cool air in. Without enough airflow, even the best CPU cooler and GPU heatsink overheat because they're just breathing the same recycled hot air.",
+      when: [
+        "GPU or CPU temps climb into the throttling range under load.",
+        "The case has only one intake or exhaust — most builds want 3–6 fans total.",
+        "You want a positive-pressure (dust-reducing) setup.",
+        "Silent PC build — swap small fast fans for large slow ones.",
+      ],
+    },
     focus: { at: [0.0, 0.45, 1.08], from: [0.15, 0.55, 2.1] },
     model: "/models/case_fans.glb",
     credits:
@@ -509,6 +626,16 @@ export const COMPONENTS: ComponentInfo[] = [
       "Wireless input lag or dropped connections.",
       "Liquid spills shorting the controller circuit.",
     ],
+    whyWhen: {
+      why:
+        "The keyboard is your primary input device. A good one improves typing speed, comfort during long sessions, and reaction time in games — a bad one causes wrist pain and typos.",
+      when: [
+        "You type all day for work or study.",
+        "You play competitive games where key response matters.",
+        "You experience wrist strain — consider ergonomic or split layouts.",
+        "The current keyboard has failing keys or feels mushy.",
+      ],
+    },
     focus: { at: [0.0, 0.05, 0.0], from: [0.0, 1.0, 1.6] },
     model: "/models/keyboard.glb",
     credits:
@@ -549,6 +676,16 @@ export const COMPONENTS: ComponentInfo[] = [
       "Worn skates dragging on the mousepad.",
       "Wireless interference causing lag or disconnects.",
     ],
+    whyWhen: {
+      why:
+        "The mouse controls where you look and click. Precision, comfort, and click feel decide how fast you can navigate, design, or aim in games — a cheap mouse causes fatigue and misclicks.",
+      when: [
+        "You do design, CAD, or photo editing — need a precise, adjustable-DPI sensor.",
+        "You game competitively — need a high polling rate and low-latency sensor.",
+        "You feel wrist or thumb strain with the current mouse.",
+        "You added a high-resolution or multi-monitor setup.",
+      ],
+    },
     focus: { at: [0.0, 0.02, 0.0], from: [0.0, 0.9, 1.4] },
     model: "/models/mouse.glb",
     credits:
@@ -589,6 +726,16 @@ export const COMPONENTS: ComponentInfo[] = [
       "Input lag from heavy image processing.",
       "Screen burn-in on OLED panels from static content.",
     ],
+    whyWhen: {
+      why:
+        "The monitor is the only part of the PC you actually look at — hardware quality is worthless if you can't see it clearly. Refresh rate, colour accuracy, and size decide how enjoyable and productive the whole PC feels.",
+      when: [
+        "Eye strain from long hours on a small or low-resolution screen.",
+        "Gaming — a higher refresh (144 Hz+) feels dramatically smoother.",
+        "Colour, photo, or video work — need an sRGB or wide-gamut display.",
+        "Productivity — dual monitors or one big ultrawide saves hours per week.",
+      ],
+    },
     focus: { at: [0.0, 0.1, 0.0], from: [0.0, 1.2, 2.2] },
     model: "/models/monitor.glb",
     credits:
@@ -629,6 +776,16 @@ export const COMPONENTS: ComponentInfo[] = [
       "UPS click-over failures during rapid power cycling.",
       "Passive units letting brownouts through to the PSU.",
     ],
+    whyWhen: {
+      why:
+        "A UPS is a battery that keeps the PC running for a few minutes after a power cut, so you can save work and shut down safely. Without one, a blackout mid-write can corrupt files or damage drives.",
+      when: [
+        "You live in an area with frequent power cuts or brownouts.",
+        "You run a home server, streaming rig, or important workstation.",
+        "You do long tasks (renders, exports, downloads) you can't afford to restart.",
+        "You are protecting a NAS, security DVR, or network gear from data loss.",
+      ],
+    },
     focus: { at: [0, 0.05, 0], from: [0.35, 0.6, 1.6] },
     model: "/models/ups.glb",
     credits:
@@ -669,6 +826,16 @@ export const COMPONENTS: ComponentInfo[] = [
       "Output sag under high continuous load.",
       "Worn contacts reducing surge protection over time.",
     ],
+    whyWhen: {
+      why:
+        "An AVR smooths spikes and drops from an unstable electrical supply, so the PSU sees a steady voltage. It protects sensitive electronics in areas where the grid delivers 180–260 V instead of a clean 220 V.",
+      when: [
+        "The mains voltage fluctuates a lot (lights dim or brighten randomly).",
+        "You've had power surges damage electronics before.",
+        "You use expensive equipment — workstations, servers, medical, audio.",
+        "You live somewhere with an unreliable grid — pair with a UPS for full protection.",
+      ],
+    },
     focus: { at: [0, 0.05, 0], from: [0.35, 0.6, 1.6] },
     model: "/models/avr.glb",
     credits:

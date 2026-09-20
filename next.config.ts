@@ -3,6 +3,15 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   reactCompiler: true,
+  images: {
+    // Wikimedia Commons is used for the port/networking reference photos in
+    // the Explore page's "Key Differences" modal. Special:FilePath resolves
+    // stable filenames to files hosted on upload.wikimedia.org.
+    remotePatterns: [
+      { protocol: "https", hostname: "commons.wikimedia.org" },
+      { protocol: "https", hostname: "upload.wikimedia.org" },
+    ],
+  },
   async redirects() {
     return [
       // Old slugs that moved to SEO-friendly canonical URLs. Handled at the

@@ -14,20 +14,26 @@ import { Viewer } from "./Viewer";
 import { DetailPanel } from "./DetailPanel";
 import { ExploreLoader } from "./ExploreLoader";
 import { ExploreHeader } from "./ExploreHeader";
+import { KeyDifferences } from "./KeyDifferences";
 import { MobileDrawer } from "./MobileDrawer";
 import { MobileInfoSheet } from "./MobileInfoSheet";
 
 export function Explorer() {
   // Whether the mobile component drawer is open (opened from the header hamburger).
   const [drawerOpen, setDrawerOpen] = useState(false);
+  // Whether the "Key Differences" modal is open (opened from the header button).
+  const [differencesOpen, setDifferencesOpen] = useState(false);
 
   return (
     // Full-screen layout. A column on mobile/tablet, becoming the original
     // row layout (sidebar | viewer | detail panel) on lg+ screens. The loader
     // overlays everything on open.
     <div className="flex h-dvh w-full flex-col overflow-hidden bg-background text-foreground">
-      {/* Top navigation bar with the brand and the PC Assembly button. */}
-      <ExploreHeader onOpenMenu={() => setDrawerOpen(true)} />
+      {/* Top navigation bar with the brand, Key Differences, and PC Assembly buttons. */}
+      <ExploreHeader
+        onOpenMenu={() => setDrawerOpen(true)}
+        onOpenDifferences={() => setDifferencesOpen(true)}
+      />
 
       <div className="flex min-h-0 min-w-0 flex-1 lg:flex-row">
         {/* Desktop sidebar: fixed 288px column, hidden on mobile/tablet. */}
@@ -55,6 +61,9 @@ export function Explorer() {
       <MobileDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)}>
         <Sidebar />
       </MobileDrawer>
+
+      {/* Key Differences modal — opens from the header button. */}
+      <KeyDifferences open={differencesOpen} onClose={() => setDifferencesOpen(false)} />
 
       <ExploreLoader />
     </div>

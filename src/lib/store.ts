@@ -5,7 +5,9 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { SidebarComponent } from "@/components/motherboard/Sidebar";
 
-// The three tabs shown in the detail panel: an overview, the functions, and common issues.
+// The tabs shown in the detail panel: an overview, the functions, and common issues.
+// (The "Why & When to Choose" guidance has moved to the Key Differences modal
+// so students can compare choices side by side.)
 export type TabId = "overview" | "functions" | "issues";
 
 // The hotspot navigation actions provided by the 3D viewer, so the store can trigger them.

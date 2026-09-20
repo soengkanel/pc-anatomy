@@ -6,9 +6,15 @@
 // button linking to the step-by-step assembly guide.
 import Image from "next/image";
 import Link from "next/link";
-import { Menu, Wrench } from "lucide-react";
+import { GitCompareArrows, Menu, Wrench } from "lucide-react";
 
-export function ExploreHeader({ onOpenMenu }: { onOpenMenu: () => void }) {
+export function ExploreHeader({
+  onOpenMenu,
+  onOpenDifferences,
+}: {
+  onOpenMenu: () => void;
+  onOpenDifferences: () => void;
+}) {
   return (
     <header className="relative z-40 flex h-16 shrink-0 items-center gap-3 border-b border-line bg-surface/80 px-3.5 backdrop-blur-xl">
       {/* Hamburger button opens the components drawer (mobile/tablet only). */}
@@ -43,13 +49,25 @@ export function ExploreHeader({ onOpenMenu }: { onOpenMenu: () => void }) {
         </span>
       </div>
 
+      {/* Key Differences button — opens the "commonly confused" comparisons. */}
+      <button
+        type="button"
+        onClick={onOpenDifferences}
+        className="ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-line bg-surface-2 px-3 py-2 text-[12.5px] font-medium text-foreground transition-colors hover:border-accent/40 hover:bg-surface-3 hover:text-accent"
+      >
+        <GitCompareArrows className="h-3.5 w-3.5" strokeWidth={1.8} />
+        <span className="hidden sm:inline">Key Differences</span>
+        <span className="sm:hidden">Compare</span>
+      </button>
+
       {/* PC Assembly button linking to the step-by-step build guide. */}
       <Link
         href="/assembly"
-        className="ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-line bg-surface-2 px-3 py-2 text-[12.5px] font-medium text-foreground transition-colors hover:border-accent/40 hover:bg-surface-3 hover:text-accent"
+        className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-line bg-surface-2 px-3 py-2 text-[12.5px] font-medium text-foreground transition-colors hover:border-accent/40 hover:bg-surface-3 hover:text-accent"
       >
         <Wrench className="h-3.5 w-3.5" strokeWidth={1.8} />
-        PC Assembly
+        <span className="hidden sm:inline">PC Assembly</span>
+        <span className="sm:hidden">Build</span>
       </Link>
 
       {/* Compact version badge (hidden on small screens). */}
