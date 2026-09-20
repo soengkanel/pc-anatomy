@@ -45,6 +45,8 @@ import {
 import {
   FileSystemRealisticVisual,
   OSFamilyRealisticVisual,
+  OSFamilyTreeVisual,
+  PopularAppsRealisticVisual,
   SoftwareInstallRealisticVisual,
   SoftwareStackRealisticVisual,
 } from "@/components/lecture/SoftwareVisuals";
@@ -152,8 +154,10 @@ const OUTLINE: Chapter[] = [
     subs: withPack("software", [
       { id: "software", label: "Software" },
       { id: "operating-systems", label: "Operating Systems" },
+      { id: "os-hierarchy", label: "OS Family Tree" },
       { id: "file-systems", label: "File Systems" },
       { id: "software-management", label: "Managing Apps" },
+      { id: "popular-apps", label: "Apps & Games" },
     ]),
   },
   {
@@ -1102,6 +1106,15 @@ function Software() {
       />
 
       <SubTopic
+        id="os-hierarchy"
+        emoji="🧬"
+        title="OS Family Tree"
+        caption="Most modern operating systems descend from UNIX (1969). Siblings share a base — that's why iOS and macOS feel similar, or Android and ChromeOS."
+        chips={["UNIX → BSD → macOS/iOS", "UNIX-like → Linux → Android", "Windows NT · its own family"]}
+        visual={<OSFamilyTreeVisual />}
+      />
+
+      <SubTopic
         id="file-systems"
         emoji="📁"
         title="File Systems"
@@ -1117,6 +1130,15 @@ function Software() {
         caption="You install an app once. Update it when a new version comes. Remove it when you don't need it."
         chips={["install from trusted store", "update often", "uninstall to save space"]}
         visual={<SoftwareInstallRealisticVisual />}
+      />
+
+      <SubTopic
+        id="popular-apps"
+        emoji="🧩"
+        title="Popular Apps & Games"
+        caption="The apps you already know. Some help you work and learn — others help you play with friends."
+        chips={["Office · Word · Excel · PPT", "QuickBooks · accounting", "Roblox · PUBG · Free Fire"]}
+        visual={<PopularAppsRealisticVisual />}
       />
       <KeyLearning summaryKey="software" />
       <LessonPack lessonKey="software" />

@@ -131,7 +131,7 @@ const SOFTWARE: Lesson = {
   terms: [
     { en: "Software", km: "ផ្នែកទន់", icon: "🪄", detail: "The instructions that make a computer do useful things." },
     { en: "Program", km: "កម្មវិធី", icon: "📦", detail: "A set of instructions written by a programmer." },
-    { en: "Operating System (OS)", km: "ប្រព័ន្ធប្រតិបត្តិការ", icon: "🖥️", detail: "The main software that runs the computer — Windows, macOS, Linux, Android, iOS." },
+    { en: "Operating System (OS)", km: "ប្រព័ន្ធប្រតិបត្តិការ", icon: "🖥️", detail: "The main software that runs the computer — Windows, macOS, Linux, Android, iOS, HarmonyOS, ChromeOS, KaiOS." },
     { en: "Application", km: "កម្មវិធីប្រើប្រាស់", icon: "🎯", detail: "A program you actively use — browser, game, chat app, word processor." },
     { en: "File", km: "ឯកសារ", icon: "📄", detail: "A container for information saved on the computer — a photo, a song, a document." },
     { en: "Folder", km: "ថតឯកសារ", icon: "📁", detail: "A drawer that groups related files together." },

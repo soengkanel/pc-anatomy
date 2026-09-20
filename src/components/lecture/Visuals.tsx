@@ -417,10 +417,13 @@ export function OSFamilyVisual() {
     { name: "Linux", emoji: "🐧", color: "bg-orange-500" },
     { name: "Android", emoji: "🤖", color: "bg-emerald-500" },
     { name: "iOS", emoji: "📱", color: "bg-slate-500" },
+    { name: "HarmonyOS", emoji: "❋", color: "bg-rose-500" },
+    { name: "ChromeOS", emoji: "◉", color: "bg-sky-500" },
+    { name: "KaiOS", emoji: "◆", color: "bg-amber-500" },
   ];
   return (
     <VisualFrame>
-      <div className="grid grid-cols-3 gap-3 sm:grid-cols-5">
+      <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
         {items.map((it, i) => (
           <motion.div
             key={it.name}
