@@ -834,3 +834,440 @@ export function InternetJourneyRealisticVisual() {
     </VisualFrame>
   );
 }
+
+/* ═════════════════════════════════════════════════════════════════
+ * 10 — HTTP Protocol: invention timeline + a real request/response
+ * ═════════════════════════════════════════════════════════════ */
+
+export function HttpProtocolRealisticVisual() {
+  const timeline = [
+    { year: "1989", event: "Berners-Lee proposes the Web at CERN" },
+    { year: "1991", event: "First website goes live · info.cern.ch" },
+    { year: "1996", event: "HTTP/1.0 published (RFC 1945)" },
+    { year: "1999", event: "HTTP/1.1 — keep-alive, Host header" },
+    { year: "2015", event: "HTTP/2 — binary, multiplexed" },
+    { year: "2022", event: "HTTP/3 — runs on QUIC (UDP)" },
+  ];
+  return (
+    <VisualFrame>
+      <div className="flex w-full max-w-[600px] gap-2">
+        {/* Inventor + timeline card */}
+        <div className="flex-1">
+          <WindowFrame title="A short history" variant="editor">
+            <div className="p-2">
+              <div className="flex items-center gap-2 rounded-md border border-amber-400/30 bg-amber-400/5 p-1.5">
+                <div className="text-2xl">👨‍🔬</div>
+                <div>
+                  <div className="text-[10px] font-bold text-white">
+                    Sir Tim Berners-Lee
+                  </div>
+                  <div className="text-[8.5px] text-amber-200/80">
+                    CERN · Geneva, Switzerland
+                  </div>
+                </div>
+              </div>
+              <div className="mt-1.5 rounded bg-black/30 p-1.5 text-[8.5px] italic text-neutral-300">
+                &quot;A way to share physics papers between
+                scientists.&quot;
+              </div>
+
+              <div className="mt-2 space-y-0.5">
+                {timeline.map((t, i) => (
+                  <motion.div
+                    key={t.year}
+                    initial={{ opacity: 0, x: -6 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.08 * i }}
+                    className="flex items-center gap-1.5 text-[9px]"
+                  >
+                    <span className="rounded bg-accent-soft px-1 py-0.5 font-mono text-[8.5px] text-accent-bright">
+                      {t.year}
+                    </span>
+                    <span className="text-neutral-300">{t.event}</span>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </WindowFrame>
+        </div>
+
+        {/* Live HTTP request/response */}
+        <div className="flex-1">
+          <WindowFrame title="curl idic.edu" variant="terminal">
+            <div className="p-2 font-mono text-[9px] leading-relaxed">
+              <div className="text-emerald-400">$ curl -v https://idic.edu/</div>
+
+              <div className="mt-1 text-neutral-500">
+                → Request
+              </div>
+              <div className="text-sky-300">GET / HTTP/1.1</div>
+              <div className="text-neutral-300">
+                <span className="text-pink-400">Host:</span> idic.edu
+              </div>
+              <div className="text-neutral-300">
+                <span className="text-pink-400">User-Agent:</span> Chrome/129
+              </div>
+              <div className="text-neutral-300">
+                <span className="text-pink-400">Accept:</span> text/html
+              </div>
+
+              <motion.div
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                transition={{ delay: 0.6 }}
+              >
+                <div className="mt-1 text-neutral-500">← Response</div>
+                <div className="text-emerald-300">
+                  HTTP/1.1 <span className="text-white">200 OK</span>
+                </div>
+                <div className="text-neutral-300">
+                  <span className="text-pink-400">Content-Type:</span> text/html
+                </div>
+                <div className="text-neutral-300">
+                  <span className="text-pink-400">Content-Length:</span> 1337
+                </div>
+                <div className="mt-1 rounded bg-white/[0.03] px-1 py-0.5 text-[8.5px] text-neutral-400">
+                  &lt;html&gt;…&lt;/html&gt;
+                </div>
+              </motion.div>
+
+              <div className="mt-1.5 flex gap-1 text-[8px]">
+                <span className="rounded-full border border-emerald-400/40 bg-emerald-400/10 px-1.5 py-0.5 text-emerald-300">
+                  200 OK
+                </span>
+                <span className="rounded-full border border-amber-400/40 bg-amber-400/10 px-1.5 py-0.5 text-amber-200">
+                  404 Not Found
+                </span>
+                <span className="rounded-full border border-rose-400/40 bg-rose-400/10 px-1.5 py-0.5 text-rose-300">
+                  500 Error
+                </span>
+              </div>
+            </div>
+          </WindowFrame>
+        </div>
+      </div>
+    </VisualFrame>
+  );
+}
+
+/* ═════════════════════════════════════════════════════════════════
+ * 11 — Static rendering: file on disk → parse → DOM → paint
+ * ═════════════════════════════════════════════════════════════ */
+
+export function StaticRenderingRealisticVisual() {
+  const steps = [
+    { emoji: "📄", label: "index.html", desc: "file on disk" },
+    { emoji: "📥", label: "Fetch", desc: "nginx sends bytes" },
+    { emoji: "🌲", label: "Parse → DOM", desc: "tree of elements" },
+    { emoji: "🎨", label: "Style", desc: "apply CSS rules" },
+    { emoji: "🖼️", label: "Paint", desc: "pixels on screen" },
+  ];
+  return (
+    <VisualFrame>
+      <div className="flex w-full max-w-[600px] flex-col gap-2">
+        <div className="text-center text-[10px] font-mono uppercase tracking-widest text-accent-bright">
+          Static page · the file never changes
+        </div>
+
+        {/* Pipeline */}
+        <div className="flex items-stretch justify-between gap-1">
+          {steps.map((s, i) => (
+            <div key={s.label} className="flex flex-1 items-center gap-1">
+              <motion.div
+                initial={{ opacity: 0, y: 6 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1 }}
+                className="flex flex-1 flex-col items-center gap-0.5 rounded-lg border border-white/10 bg-white/[0.04] p-1.5"
+              >
+                <div className="text-xl">{s.emoji}</div>
+                <div className="text-[9px] font-bold text-white">{s.label}</div>
+                <div className="text-[8px] text-neutral-400">{s.desc}</div>
+              </motion.div>
+              {i < steps.length - 1 && (
+                <motion.div
+                  animate={{ x: [0, 3, 0] }}
+                  transition={{ duration: 1.2, delay: i * 0.15, repeat: Infinity }}
+                  className="text-xs text-neutral-500"
+                >
+                  →
+                </motion.div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Server side */}
+        <div className="flex gap-2">
+          <WindowFrame title="nginx · the server" variant="terminal" className="flex-1">
+            <div className="p-2 font-mono text-[9px]">
+              <div className="text-neutral-500">/var/www/idic/</div>
+              <div className="text-neutral-300">├── index.html</div>
+              <div className="text-neutral-300">├── style.css</div>
+              <div className="text-neutral-300">├── logo.png</div>
+              <div className="mt-1 rounded bg-black/40 px-1.5 py-1 text-[8.5px] text-emerald-300">
+                nginx just reads the file and sends it. No code runs.
+              </div>
+            </div>
+          </WindowFrame>
+
+          <WindowFrame title="idic.edu" variant="browser" className="flex-1">
+            <div className="bg-white p-2">
+              <div className="text-[8.5px] text-neutral-500">DOM tree</div>
+              <div className="mt-1 font-mono text-[9px] text-neutral-700">
+                <div>html</div>
+                <div className="pl-2">├── head</div>
+                <div className="pl-2">└── body</div>
+                <div className="pl-6">├── h1 &quot;Welcome&quot;</div>
+                <div className="pl-6">├── p &quot;IDIC class&quot;</div>
+                <div className="pl-6">└── img</div>
+              </div>
+              <motion.div
+                animate={{ opacity: [0.5, 1, 0.5] }}
+                transition={{ duration: 1.4, repeat: Infinity }}
+                className="mt-1 rounded bg-accent-soft px-1.5 py-0.5 text-center text-[8.5px] text-accent-bright"
+              >
+                ✓ same bytes for everyone
+              </motion.div>
+            </div>
+          </WindowFrame>
+        </div>
+      </div>
+    </VisualFrame>
+  );
+}
+
+/* ═════════════════════════════════════════════════════════════════
+ * 12 — Dynamic rendering: server runs code + queries DB per request
+ * ═════════════════════════════════════════════════════════════ */
+
+export function DynamicRenderingRealisticVisual() {
+  return (
+    <VisualFrame>
+      <div className="flex w-full max-w-[620px] flex-col gap-2">
+        <div className="text-center text-[10px] font-mono uppercase tracking-widest text-accent-bright">
+          Dynamic page · built fresh for every visitor
+        </div>
+
+        <div className="flex items-stretch gap-2">
+          {/* Browser */}
+          <WindowFrame title="student · logged in" variant="browser" className="flex-1">
+            <div className="bg-white p-2">
+              <div className="text-[8.5px] text-neutral-500">
+                GET /dashboard
+              </div>
+              <motion.div
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                transition={{ delay: 0.8 }}
+                className="mt-1"
+              >
+                <div className="text-[10px] font-bold text-neutral-900">
+                  Hi, Sokha 👋
+                </div>
+                <div className="mt-0.5 text-[8.5px] text-neutral-600">
+                  Your grade: <span className="font-bold text-emerald-600">A</span>
+                </div>
+                <div className="text-[8.5px] text-neutral-600">
+                  3 new messages
+                </div>
+              </motion.div>
+            </div>
+          </WindowFrame>
+
+          {/* Arrow + request */}
+          <div className="flex flex-col items-center justify-center gap-0.5">
+            <motion.div
+              animate={{ x: [0, 3, 0] }}
+              transition={{ duration: 1.4, repeat: Infinity }}
+              className="font-mono text-[8px] text-accent-bright"
+            >
+              GET →
+            </motion.div>
+            <motion.div
+              animate={{ x: [0, -3, 0] }}
+              transition={{ duration: 1.4, delay: 0.7, repeat: Infinity }}
+              className="font-mono text-[8px] text-emerald-400"
+            >
+              ← HTML
+            </motion.div>
+          </div>
+
+          {/* Server */}
+          <WindowFrame title="dashboard.py · Django" className="flex-1">
+            <div className="p-2 font-mono text-[9px]">
+              <div className="text-purple-300">def dashboard(request):</div>
+              <div className="pl-2">
+                <span className="text-pink-400">user</span> ={" "}
+                <span className="text-sky-300">request</span>.user
+              </div>
+              <div className="pl-2">
+                <span className="text-pink-400">grade</span> = db.query(…)
+              </div>
+              <div className="pl-2">
+                <span className="text-pink-400">return</span>{" "}
+                <span className="text-amber-300">render</span>(
+                <span className="text-emerald-300">&quot;home.html&quot;</span>,
+                …)
+              </div>
+              <motion.div
+                animate={{ opacity: [0.4, 1, 0.4] }}
+                transition={{ duration: 1.6, repeat: Infinity }}
+                className="mt-1 rounded bg-purple-500/15 px-1.5 py-0.5 text-[8.5px] text-purple-300"
+              >
+                code runs on every request
+              </motion.div>
+            </div>
+          </WindowFrame>
+
+          {/* Arrow to DB */}
+          <div className="flex flex-col items-center justify-center gap-0.5">
+            <motion.div
+              animate={{ x: [0, 3, 0] }}
+              transition={{ duration: 1.4, delay: 0.3, repeat: Infinity }}
+              className="font-mono text-[8px] text-amber-300"
+            >
+              SELECT →
+            </motion.div>
+            <motion.div
+              animate={{ x: [0, -3, 0] }}
+              transition={{ duration: 1.4, delay: 1.0, repeat: Infinity }}
+              className="font-mono text-[8px] text-emerald-400"
+            >
+              ← rows
+            </motion.div>
+          </div>
+
+          {/* DB */}
+          <div className="flex flex-col items-center justify-center">
+            <div className="rounded-lg border border-purple-400/40 bg-purple-400/10 p-1.5 text-center">
+              <div className="text-2xl">🗃️</div>
+              <div className="text-[9px] font-bold text-purple-200">
+                Postgres
+              </div>
+              <div className="text-[8px] text-purple-300/70">
+                students · grades
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex justify-center gap-2 text-[9px]">
+          <div className="rounded-full border border-white/10 bg-white/[0.03] px-2 py-0.5 text-neutral-300">
+            🧑 personalised per user
+          </div>
+          <div className="rounded-full border border-white/10 bg-white/[0.03] px-2 py-0.5 text-neutral-300">
+            🧠 server runs Python / PHP / Node
+          </div>
+        </div>
+      </div>
+    </VisualFrame>
+  );
+}
+
+/* ═════════════════════════════════════════════════════════════════
+ * 13 — Database: SQL query → table → result
+ * ═════════════════════════════════════════════════════════════ */
+
+export function DatabaseRealisticVisual() {
+  const rows = [
+    { id: 1, name: "Sokha", grade: "A", city: "Phnom Penh" },
+    { id: 2, name: "Dara", grade: "B", city: "Siem Reap" },
+    { id: 3, name: "Lina", grade: "A", city: "Battambang" },
+    { id: 4, name: "Chea", grade: "C", city: "Kampot" },
+  ];
+  const matches = rows.filter((r) => r.grade === "A");
+  return (
+    <VisualFrame>
+      <div className="flex w-full max-w-[600px] flex-col gap-2">
+        {/* Query */}
+        <WindowFrame title="psql · students db" variant="terminal">
+          <div className="p-2 font-mono text-[9.5px]">
+            <div className="text-emerald-400">students=#</div>
+            <div>
+              <span className="text-pink-400">SELECT</span>{" "}
+              <span className="text-sky-300">name, city</span>
+            </div>
+            <div>
+              <span className="text-pink-400">FROM</span>{" "}
+              <span className="text-amber-300">students</span>
+            </div>
+            <div>
+              <span className="text-pink-400">WHERE</span>{" "}
+              <span className="text-sky-300">grade</span>{" "}
+              <span className="text-white">=</span>{" "}
+              <span className="text-emerald-300">&apos;A&apos;</span>;
+            </div>
+          </div>
+        </WindowFrame>
+
+        <div className="flex items-stretch gap-2">
+          {/* The table */}
+          <WindowFrame title="students table" className="flex-1">
+            <div className="p-1.5">
+              <div className="grid grid-cols-4 gap-0.5 border-b border-neutral-700 pb-0.5 text-[8px] font-bold uppercase tracking-widest text-neutral-400">
+                <div>id</div>
+                <div>name</div>
+                <div>grade</div>
+                <div>city</div>
+              </div>
+              {rows.map((r, i) => {
+                const hit = r.grade === "A";
+                return (
+                  <motion.div
+                    key={r.id}
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    transition={{ delay: 0.1 * i }}
+                    className={`grid grid-cols-4 gap-0.5 border-b border-neutral-800/60 py-0.5 font-mono text-[9px] ${
+                      hit
+                        ? "bg-emerald-400/10 text-emerald-200"
+                        : "text-neutral-400"
+                    }`}
+                  >
+                    <div>{r.id}</div>
+                    <div>{r.name}</div>
+                    <div>{r.grade}</div>
+                    <div>{r.city}</div>
+                  </motion.div>
+                );
+              })}
+              <div className="mt-1 text-[8px] text-neutral-500">
+                every row is a record · every column is a field
+              </div>
+            </div>
+          </WindowFrame>
+
+          {/* Result */}
+          <WindowFrame title="result" variant="terminal" className="flex-1">
+            <div className="p-2 font-mono text-[9.5px]">
+              <div className="text-emerald-400">
+                {matches.length} rows
+              </div>
+              {matches.map((r) => (
+                <motion.div
+                  key={r.id}
+                  initial={{ opacity: 0, x: -4 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.4 + 0.15 * r.id }}
+                  className="text-neutral-200"
+                >
+                  <span className="text-sky-300">{r.name}</span>
+                  <span className="text-neutral-500"> · </span>
+                  <span className="text-amber-300">{r.city}</span>
+                </motion.div>
+              ))}
+              <div className="mt-1.5 flex gap-1 text-[8px]">
+                <span className="rounded-full border border-sky-400/40 bg-sky-400/10 px-1.5 py-0.5 text-sky-300">
+                  SQL · Postgres / MySQL
+                </span>
+                <span className="rounded-full border border-fuchsia-400/40 bg-fuchsia-400/10 px-1.5 py-0.5 text-fuchsia-300">
+                  NoSQL · Mongo / Redis
+                </span>
+              </div>
+            </div>
+          </WindowFrame>
+        </div>
+      </div>
+    </VisualFrame>
+  );
+}

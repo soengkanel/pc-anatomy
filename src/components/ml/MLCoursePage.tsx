@@ -516,6 +516,26 @@ function Sidebar({
             <span className="flex-1 truncate font-medium">Rust course</span>
             <ArrowRight className="h-3 w-3 opacity-60 transition-transform group-hover:translate-x-0.5" />
           </Link>
+          <Link
+            href="/statistics"
+            className="group flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-2.5 py-2 text-[12px] text-neutral-300 transition-colors hover:border-emerald-400/40 hover:bg-emerald-400/10 hover:text-emerald-200"
+          >
+            <span className="flex h-6 w-6 items-center justify-center rounded-md border border-white/10 bg-white/[0.04] text-emerald-300">
+              <BarChart3 className="h-3.5 w-3.5" />
+            </span>
+            <span className="flex-1 truncate font-medium">Statistics course</span>
+            <ArrowRight className="h-3 w-3 opacity-60 transition-transform group-hover:translate-x-0.5" />
+          </Link>
+          <Link
+            href="/dsa"
+            className="group flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-2.5 py-2 text-[12px] text-neutral-300 transition-colors hover:border-indigo-400/40 hover:bg-indigo-400/10 hover:text-indigo-200"
+          >
+            <span className="flex h-6 w-6 items-center justify-center rounded-md border border-white/10 bg-white/[0.04] text-indigo-300">
+              <span className="text-[11px]">🧩</span>
+            </span>
+            <span className="flex-1 truncate font-medium">DSA in Rust</span>
+            <ArrowRight className="h-3 w-3 opacity-60 transition-transform group-hover:translate-x-0.5" />
+          </Link>
           <div className="text-[11px] text-neutral-500">IDIC · Machine Learning</div>
         </div>
       </div>

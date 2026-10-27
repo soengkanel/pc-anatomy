@@ -371,9 +371,11 @@ function ClockBar({
               from sm up so it doesn't crowd the session controls. */}
           <Link
             href="/whiteboard"
+            target="_blank"
+            rel="noopener noreferrer"
             className="ml-1 inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.04] px-2.5 py-1.5 text-[12px] font-medium text-neutral-300 transition-colors hover:border-accent/40 hover:bg-accent-soft hover:text-accent-bright"
-            aria-label="Open Whiteboard"
-            title="Open Whiteboard"
+            aria-label="Open Whiteboard in new tab"
+            title="Open Whiteboard in new tab"
           >
             <Pencil className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Whiteboard</span>

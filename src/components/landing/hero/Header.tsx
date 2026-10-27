@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 // Nav links used in both the desktop bar and the mobile menu
 const NAV_LINKS = [
   { label: "Features", href: "#features" },
+  { label: "Courses", href: "#courses" },
   { label: "Roadmap", href: "#roadmap" },
   { label: "Community", href: "#community" },
   { label: "GitHub", href: "https://github.com/brickshow/pc-anatomy", external: true },

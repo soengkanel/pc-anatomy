@@ -685,6 +685,112 @@ export function PhishingRealisticVisual() {
 }
 
 /* ═════════════════════════════════════════════════════════════════
+ * 7.5 — Stuxnet: the perfect attack, as a 7-step kill-chain
+ * ═════════════════════════════════════════════════════════════ */
+
+export function StuxnetRealisticVisual() {
+  const steps = [
+    { n: 1, icon: "🔌", title: "Hide in a USB", detail: "A worker plugs it in. The virus wakes up.", color: "text-amber-300", dot: "bg-amber-400" },
+    { n: 2, icon: "🪟", title: "Sneak into Windows", detail: "Uses 4 secret bugs nobody has fixed yet.", color: "text-rose-300", dot: "bg-rose-400" },
+    { n: 3, icon: "📜", title: "Fake ID", detail: "Signed with a stolen company badge.", color: "text-fuchsia-300", dot: "bg-fuchsia-400" },
+    { n: 4, icon: "🕸️", title: "Spread quietly", detail: "Jumps PC to PC. Only wakes up at the target.", color: "text-sky-300", dot: "bg-sky-400" },
+    { n: 5, icon: "🧠", title: "Find the machine", detail: "Looks for the chip that spins centrifuges.", color: "text-emerald-300", dot: "bg-emerald-400" },
+    { n: 6, icon: "🌀", title: "Spin too fast", detail: "Shakes the machines until they break.", color: "text-orange-300", dot: "bg-orange-400" },
+    { n: 7, icon: "🎭", title: "Lie to the screen", detail: "Workers see 'all normal' while machines break.", color: "text-violet-300", dot: "bg-violet-400" },
+  ];
+
+  return (
+    <VisualFrame>
+      <div className="flex h-full w-full flex-col gap-2">
+        {/* Top banner */}
+        <div className="flex items-center justify-between rounded-md border border-rose-400/30 bg-rose-500/5 px-3 py-1.5">
+          <div className="flex items-center gap-2">
+            <motion.div
+              className="h-2 w-2 rounded-full bg-rose-400"
+              animate={{ opacity: [0.3, 1, 0.3] }}
+              transition={{ duration: 1.1, repeat: Infinity }}
+            />
+            <div className="text-[10px] font-mono uppercase tracking-widest text-rose-200">
+              Case file · stuxnet.worm
+            </div>
+          </div>
+          <div className="flex gap-1.5 font-mono text-[9px]">
+            <span className="rounded bg-black/40 px-1.5 py-0.5 text-neutral-300">where: Iran nuclear factory</span>
+            <span className="rounded bg-black/40 px-1.5 py-0.5 text-neutral-300">when: 2010</span>
+            <span className="rounded bg-black/40 px-1.5 py-0.5 text-neutral-300">size: tiny · 500 KB</span>
+          </div>
+        </div>
+
+        {/* Attack chain */}
+        <div className="relative flex flex-1 items-stretch gap-1.5">
+          {steps.map((s, i) => (
+            <motion.div
+              key={s.n}
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.12 }}
+              className="relative flex flex-1 flex-col rounded-lg border border-white/10 bg-black/40 p-1.5"
+            >
+              {/* Phase pill */}
+              <div className="mb-1 flex items-center justify-between">
+                <div className="rounded bg-white/[0.06] px-1.5 py-0.5 font-mono text-[8px] uppercase tracking-widest text-neutral-400">
+                  phase {s.n}
+                </div>
+                <motion.div
+                  className={`h-1.5 w-1.5 rounded-full ${s.dot}`}
+                  animate={{ opacity: [0.4, 1, 0.4] }}
+                  transition={{ duration: 1.4, delay: i * 0.15, repeat: Infinity }}
+                />
+              </div>
+
+              <div className="text-2xl leading-none">{s.icon}</div>
+              <div className={`mt-1 text-[11px] font-bold ${s.color}`}>{s.title}</div>
+              <div className="mt-0.5 text-[9px] leading-tight text-neutral-400">
+                {s.detail}
+              </div>
+
+              {/* Arrow to next card */}
+              {i < steps.length - 1 && (
+                <motion.div
+                  className="pointer-events-none absolute -right-2 top-1/2 z-10 -translate-y-1/2 text-xs text-rose-300"
+                  animate={{ x: [0, 3, 0] }}
+                  transition={{ duration: 1, delay: i * 0.1, repeat: Infinity }}
+                >
+                  ▶
+                </motion.div>
+              )}
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Bottom result readout */}
+        <div className="grid grid-cols-4 gap-1.5">
+          {[
+            { k: "machines broken", v: "~1,000", color: "text-rose-300" },
+            { k: "set Iran back by", v: "2+ years", color: "text-amber-300" },
+            { k: "secret bugs used", v: "4", color: "text-fuchsia-300" },
+            { k: "hidden for", v: "17 months", color: "text-violet-300" },
+          ].map((m) => (
+            <div key={m.k} className="rounded-md border border-white/10 bg-black/50 px-2 py-1">
+              <div className="text-[8px] uppercase tracking-widest text-neutral-500">
+                {m.k}
+              </div>
+              <div className={`font-mono text-[12px] font-bold ${m.color}`}>
+                {m.v}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="text-center text-[9.5px] italic text-neutral-400">
+          First virus in history to break <span className="text-white">real machines</span> — not just computers.
+        </div>
+      </div>
+    </VisualFrame>
+  );
+}
+
+/* ═════════════════════════════════════════════════════════════════
  * 8 — Defenses: multi-layer security stack diagram
  * ═════════════════════════════════════════════════════════════ */
 

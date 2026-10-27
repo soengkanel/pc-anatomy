@@ -259,121 +259,267 @@ export function IpMacRealisticVisual() {
  * ═════════════════════════════════════════════════════════════ */
 
 export function SwitchRouterRealisticVisual() {
+  const devices = [
+    { icon: "💻", name: "Laptop", y: 15 },
+    { icon: "📱", name: "Phone", y: 38 },
+    { icon: "🖥️", name: "Desktop", y: 62 },
+    { icon: "🖨️", name: "Printer", y: 85 },
+  ];
+  // Column x-centers (percent of frame width)
+  const X = { dev: 7, switchC: 32, routerC: 62, net: 90 };
+  // Timing constants (seconds) — both packets loop on the same cadence, offset in time
+  const LAN_DUR = 3.0;
+  const WAN_DUR = 3.4;
+  const CYCLE_DELAY = 0.9;
+
   return (
     <VisualFrame>
-      <div className="flex w-full items-stretch gap-3">
-        {/* SWITCH */}
-        <div className="flex flex-1 flex-col gap-2">
-          <div className="text-center">
-            <div className="text-[10px] font-mono uppercase tracking-widest text-emerald-300">
-              Switch
+      <div className="relative h-full w-full text-white">
+        {/* ── Wires ─────────────────────────────────────────────────── */}
+        <svg
+          className="absolute inset-0 h-full w-full"
+          viewBox="0 0 100 100"
+          preserveAspectRatio="none"
+          aria-hidden
+        >
+          {/* Device → Switch (4 wires converging on switch left face) */}
+          {devices.map((d) => (
+            <path
+              key={d.name}
+              d={`M ${X.dev + 3} ${d.y} L 22 ${d.y} Q 24 ${d.y} 24 ${(d.y + 50) / 2} L 24 50`}
+              stroke="rgba(52,211,153,0.35)"
+              strokeWidth="0.4"
+              strokeDasharray="1,0.6"
+              fill="none"
+            />
+          ))}
+          {/* Switch ↔ Router uplink (thicker, dashed) */}
+          <line
+            x1="42"
+            y1="50"
+            x2="52"
+            y2="50"
+            stroke="rgba(148,163,184,0.7)"
+            strokeWidth="0.6"
+            strokeDasharray="1.5,1"
+          />
+          {/* Router → Internet */}
+          <line
+            x1="72"
+            y1="50"
+            x2="86"
+            y2="50"
+            stroke="rgba(56,189,248,0.6)"
+            strokeWidth="0.6"
+            strokeDasharray="1.5,1"
+          />
+        </svg>
+
+        {/* ── Devices column ─────────────────────────────────────────── */}
+        {devices.map((d) => (
+          <div
+            key={d.name}
+            className="pointer-events-none absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center"
+            style={{ left: `${X.dev}%`, top: `${d.y}%` }}
+          >
+            <span className="text-xl leading-none">{d.icon}</span>
+            <span className="mt-0.5 font-mono text-[7px] text-neutral-500">{d.name}</span>
+          </div>
+        ))}
+
+        {/* ── Switch box ─────────────────────────────────────────────── */}
+        <div
+          className="absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-1"
+          style={{ left: `${X.switchC}%`, top: "50%", width: "20%" }}
+        >
+          <div className="w-full rounded-md border-2 border-emerald-500/40 bg-gradient-to-b from-neutral-800 to-neutral-950 px-1.5 py-1 shadow-lg">
+            <div className="flex items-center justify-between">
+              <span className="font-mono text-[7px] text-emerald-400">🟢 PWR</span>
+              <span className="font-mono text-[6.5px] text-neutral-500">SW-24</span>
             </div>
-            <div className="text-[9px] text-neutral-400">connects local devices</div>
-          </div>
-
-          {/* Devices connected to switch */}
-          <div className="flex justify-around">
-            {["💻", "📱", "🖥️", "🖨️"].map((d, i) => (
-              <div key={i} className="flex flex-col items-center gap-0.5">
-                <div className="text-lg">{d}</div>
-                <div className="h-4 w-px bg-emerald-400/60" />
-              </div>
-            ))}
-          </div>
-
-          {/* Rackmount switch */}
-          <div className="relative rounded-lg border-2 border-neutral-600 bg-gradient-to-b from-neutral-800 to-neutral-950 shadow-lg">
-            <div className="flex items-center justify-between px-2 py-1.5">
-              <div className="flex items-center gap-1">
-                <div className="text-[10px]">🟢</div>
-                <div className="font-mono text-[8px] text-emerald-400">PWR</div>
-              </div>
-              <div className="text-[8px] font-mono text-neutral-500">IDIC-SW-24</div>
-            </div>
-            {/* Ethernet ports with blinking activity LEDs */}
-            <div className="flex justify-around border-t border-neutral-700 bg-neutral-900 px-1 py-1.5">
-              {[...Array(8)].map((_, i) => (
-                <div key={i} className="flex flex-col items-center gap-0.5">
-                  <motion.div
-                    className="h-1 w-1 rounded-full bg-emerald-400"
-                    animate={{ opacity: [0.2, 1, 0.2] }}
-                    transition={{ duration: 0.6, delay: (i * 0.08) % 0.6, repeat: Infinity }}
-                    style={{ filter: "drop-shadow(0 0 3px rgba(52,211,153,0.9))" }}
-                  />
-                  <div className="h-2.5 w-3 rounded-sm border border-neutral-700 bg-black" />
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="rounded-md bg-black/40 px-2 py-1 text-center text-[9.5px] text-emerald-200">
-            same network · fast switching
-          </div>
-        </div>
-
-        {/* ROUTER */}
-        <div className="flex flex-1 flex-col gap-2">
-          <div className="text-center">
-            <div className="text-[10px] font-mono uppercase tracking-widest text-sky-300">
-              Router
-            </div>
-            <div className="text-[9px] text-neutral-400">connects to the internet</div>
-          </div>
-
-          {/* Router with antennas */}
-          <div className="flex flex-col items-center">
-            {/* Antennas */}
-            <div className="flex gap-6">
-              {[0, 1, 2].map((i) => (
+            <div className="mt-0.5 flex justify-around">
+              {[...Array(6)].map((_, i) => (
                 <motion.div
                   key={i}
-                  animate={{ rotate: [-3, 3, -3] }}
-                  transition={{ duration: 2, delay: i * 0.2, repeat: Infinity }}
-                  className="h-6 w-1 rounded-full bg-neutral-700"
+                  className="h-1 w-1 rounded-full bg-emerald-400"
+                  animate={{ opacity: [0.25, 1, 0.25] }}
+                  transition={{ duration: 0.6, delay: (i * 0.1) % 0.6, repeat: Infinity }}
+                  style={{ filter: "drop-shadow(0 0 3px rgba(52,211,153,0.9))" }}
                 />
               ))}
             </div>
+          </div>
+          <div className="rounded bg-emerald-500/15 px-1.5 py-0.5 font-mono text-[8px] font-bold tracking-wider text-emerald-300">
+            SWITCH
+          </div>
+          <div className="text-center font-mono text-[7px] text-emerald-200/70">
+            Layer 2 · MAC
+          </div>
+        </div>
 
-            {/* Router body */}
-            <div className="relative w-full rounded-lg border-2 border-neutral-600 bg-gradient-to-b from-neutral-800 to-neutral-900 shadow-lg">
-              <div className="flex items-center justify-between px-3 py-2">
-                <div className="flex flex-col gap-1">
-                  {[
-                    { l: "PWR", c: "text-emerald-400" },
-                    { l: "WAN", c: "text-sky-400" },
-                    { l: "WiFi", c: "text-amber-400" },
-                  ].map((led, i) => (
-                    <div key={led.l} className="flex items-center gap-1.5">
-                      <motion.div
-                        className={`h-1.5 w-1.5 rounded-full ${led.c.replace("text-", "bg-")}`}
-                        animate={{ opacity: [0.4, 1, 0.4] }}
-                        transition={{ duration: 1 + i * 0.2, repeat: Infinity }}
-                      />
-                      <span className={`font-mono text-[8.5px] ${led.c}`}>{led.l}</span>
-                    </div>
-                  ))}
-                </div>
-                <div className="text-3xl">📡</div>
-                <div className="text-right">
-                  <div className="font-mono text-[8px] text-neutral-500">IDIC-RT</div>
-                  <div className="font-mono text-[7px] text-neutral-600">Wi-Fi 6</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Wi-Fi waves + internet */}
-            <div className="relative mt-2 flex items-center justify-center">
+        {/* ── Router box ─────────────────────────────────────────────── */}
+        <div
+          className="absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-1"
+          style={{ left: `${X.routerC}%`, top: "50%", width: "20%" }}
+        >
+          <div className="flex gap-3">
+            {[0, 1, 2].map((i) => (
               <motion.div
-                animate={{ scale: [1, 1.4, 1], opacity: [0.6, 0, 0.6] }}
-                transition={{ duration: 2, repeat: Infinity }}
-                className="absolute h-8 w-8 rounded-full border-2 border-sky-400"
+                key={i}
+                animate={{ rotate: [-4, 4, -4] }}
+                transition={{ duration: 2, delay: i * 0.2, repeat: Infinity }}
+                className="h-3 w-0.5 rounded-full bg-neutral-500"
               />
-              <span className="text-2xl">🌐</span>
+            ))}
+          </div>
+          <div className="w-full rounded-md border-2 border-sky-500/40 bg-gradient-to-b from-neutral-800 to-neutral-900 px-1.5 py-1 shadow-lg">
+            <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-0.5">
+                {[
+                  { l: "WAN", c: "bg-sky-400" },
+                  { l: "WiFi", c: "bg-amber-400" },
+                ].map((led, i) => (
+                  <div key={led.l} className="flex items-center gap-1">
+                    <motion.div
+                      className={`h-1 w-1 rounded-full ${led.c}`}
+                      animate={{ opacity: [0.4, 1, 0.4] }}
+                      transition={{ duration: 1 + i * 0.2, repeat: Infinity }}
+                    />
+                    <span className="font-mono text-[6.5px] text-neutral-400">{led.l}</span>
+                  </div>
+                ))}
+              </div>
+              <span className="text-base">📡</span>
             </div>
           </div>
+          <div className="rounded bg-sky-500/15 px-1.5 py-0.5 font-mono text-[8px] font-bold tracking-wider text-sky-300">
+            ROUTER
+          </div>
+          <div className="text-center font-mono text-[7px] text-sky-200/70">Layer 3 · IP</div>
+        </div>
 
-          <div className="rounded-md bg-black/40 px-2 py-1 text-center text-[9.5px] text-sky-200">
-            different networks · smart routing
+        {/* ── Internet ───────────────────────────────────────────────── */}
+        <div
+          className="absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-1"
+          style={{ left: `${X.net}%`, top: "50%", width: "14%" }}
+        >
+          <div className="relative flex h-9 w-9 items-center justify-center">
+            {[0, 1].map((i) => (
+              <motion.div
+                key={i}
+                animate={{ scale: [1, 1.8, 1], opacity: [0.5, 0, 0.5] }}
+                transition={{ duration: 2, delay: i * 0.7, repeat: Infinity }}
+                className="absolute h-8 w-8 rounded-full border-2 border-sky-400"
+              />
+            ))}
+            <span className="text-3xl">🌐</span>
+          </div>
+          <div className="rounded bg-black/50 px-1.5 py-0.5 font-mono text-[8px] font-bold tracking-wider text-sky-300">
+            INTERNET
+          </div>
+          <div className="text-center font-mono text-[7px] text-sky-200/70">WAN</div>
+        </div>
+
+        {/* ── Decision bubbles ───────────────────────────────────────── */}
+        {/* LAN decision at switch (green): appears while LAN packet is at switch */}
+        <motion.div
+          className="pointer-events-none absolute z-30 -translate-x-1/2 rounded border border-emerald-400/40 bg-black/80 px-1.5 py-0.5 font-mono text-[7px] text-emerald-300 shadow"
+          style={{ left: `${X.switchC}%`, top: "18%" }}
+          animate={{ opacity: [0, 1, 1, 0] }}
+          transition={{
+            duration: LAN_DUR + CYCLE_DELAY,
+            times: [0.28, 0.4, 0.6, 0.72],
+            repeat: Infinity,
+            ease: "linear",
+          }}
+        >
+          MAC found → LAN port
+        </motion.div>
+        {/* WAN decision at switch (blue): "not local → uplink" */}
+        <motion.div
+          className="pointer-events-none absolute z-30 -translate-x-1/2 rounded border border-sky-400/40 bg-black/80 px-1.5 py-0.5 font-mono text-[7px] text-sky-300 shadow"
+          style={{ left: `${X.switchC}%`, top: "82%" }}
+          animate={{ opacity: [0, 1, 1, 0] }}
+          transition={{
+            duration: WAN_DUR + CYCLE_DELAY,
+            delay: (LAN_DUR + CYCLE_DELAY) / 2,
+            times: [0.18, 0.28, 0.42, 0.5],
+            repeat: Infinity,
+            ease: "linear",
+          }}
+        >
+          not local → uplink
+        </motion.div>
+        {/* WAN decision at router: "IP outside LAN → forward WAN" */}
+        <motion.div
+          className="pointer-events-none absolute z-30 -translate-x-1/2 rounded border border-sky-400/40 bg-black/80 px-1.5 py-0.5 font-mono text-[7px] text-sky-300 shadow"
+          style={{ left: `${X.routerC}%`, top: "18%" }}
+          animate={{ opacity: [0, 1, 1, 0] }}
+          transition={{
+            duration: WAN_DUR + CYCLE_DELAY,
+            delay: (LAN_DUR + CYCLE_DELAY) / 2,
+            times: [0.42, 0.52, 0.66, 0.74],
+            repeat: Infinity,
+            ease: "linear",
+          }}
+        >
+          IP → forward to WAN
+        </motion.div>
+
+        {/* ── LAN packet: 💻 → switch → 🖨️  (never enters router) ─── */}
+        <motion.div
+          className="pointer-events-none absolute z-30 -translate-x-1/2 -translate-y-1/2 rounded bg-emerald-400 px-1.5 py-0.5 font-mono text-[8px] font-bold text-emerald-950 shadow-[0_0_12px_rgba(52,211,153,0.95)]"
+          animate={{
+            left: [`${X.dev}%`, `${X.switchC}%`, `${X.dev}%`, `${X.dev}%`],
+            top: [`${devices[0].y}%`, "50%", `${devices[3].y}%`, `${devices[3].y}%`],
+            opacity: [1, 1, 1, 0],
+          }}
+          transition={{
+            duration: LAN_DUR,
+            times: [0, 0.45, 0.9, 1],
+            repeat: Infinity,
+            repeatDelay: CYCLE_DELAY,
+            ease: "linear",
+          }}
+        >
+          💻→🖨️ · MAC
+        </motion.div>
+
+        {/* ── WAN packet: 📱 → switch → router → 🌐 ─────────────── */}
+        <motion.div
+          className="pointer-events-none absolute z-30 -translate-x-1/2 -translate-y-1/2 rounded bg-sky-400 px-1.5 py-0.5 font-mono text-[8px] font-bold text-sky-950 shadow-[0_0_12px_rgba(56,189,248,0.95)]"
+          animate={{
+            left: [
+              `${X.dev}%`,
+              `${X.switchC}%`,
+              `${X.routerC}%`,
+              `${X.net}%`,
+              `${X.net}%`,
+            ],
+            top: [`${devices[1].y}%`, "50%", "50%", "50%", "50%"],
+            opacity: [1, 1, 1, 1, 0],
+          }}
+          transition={{
+            duration: WAN_DUR,
+            times: [0, 0.32, 0.62, 0.92, 1],
+            repeat: Infinity,
+            repeatDelay: CYCLE_DELAY,
+            delay: (LAN_DUR + CYCLE_DELAY) / 2,
+            ease: "linear",
+          }}
+        >
+          📱→🌐 · IP
+        </motion.div>
+
+        {/* ── Bottom legend ──────────────────────────────────────────── */}
+        <div className="absolute inset-x-0 bottom-1 flex justify-center gap-2">
+          <div className="flex items-center gap-1 rounded bg-black/60 px-1.5 py-0.5 font-mono text-[7.5px]">
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-400" />
+            <span className="text-emerald-200">LAN · stays inside the switch</span>
+          </div>
+          <div className="flex items-center gap-1 rounded bg-black/60 px-1.5 py-0.5 font-mono text-[7.5px]">
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-sky-400" />
+            <span className="text-sky-200">WAN · switch → router → internet</span>
           </div>
         </div>
       </div>

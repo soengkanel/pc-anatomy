@@ -8,6 +8,7 @@ import * as THREE from "three";
 import { Header } from "@/components/landing/hero/Header";
 import { Hero } from "@/components/landing/Hero";
 import { Features } from "@/components/landing/Features";
+import { Courses } from "@/components/landing/Courses";
 import { HardwarePreview } from "@/components/landing/HardwarePreview";
 import { LearningExperience } from "@/components/landing/LearningExperience";
 import { Roadmap } from "@/components/landing/Roadmap";
@@ -233,6 +234,7 @@ export function LandingPage({ children }: { children?: React.ReactNode }) {
         <main>
           <Hero />
           <Features />
+          <Courses />
           <Roadmap />
           <Community />
         </main>

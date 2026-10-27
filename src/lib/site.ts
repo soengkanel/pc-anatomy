@@ -8,8 +8,8 @@ export const SITE_URL: string = (
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://pc-anatomy.brickshow.site"
 ).replace(/\/+$/, "");
 
-export const SITE_NAME = "PC Anatomy";
-export const SITE_TITLE = "PC Anatomy — Explore Computer Hardware in 3D";
+export const SITE_NAME = "IDIC";
+export const SITE_TITLE = "IDIC — Institute of Digital Intelligence Cambodia";
 export const SITE_DESCRIPTION =
   "Explore computer hardware through an interactive 3D PC Anatomy experience. Learn about CPUs, RAM, motherboards, GPUs, storage, power supplies, and PC assembly.";
 export const SITE_LANGUAGE = "en";

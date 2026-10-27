@@ -47,7 +47,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
     default: SITE_TITLE,
-    template: "%s | PC Anatomy",
+    template: "%s | IDIC",
   },
   description: SITE_DESCRIPTION,
   keywords: [

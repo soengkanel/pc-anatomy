@@ -11,17 +11,24 @@ import {
   ArrowLeft,
   ArrowRight,
   Award,
+  BarChart3,
+  BookMarked,
   Boxes,
   BrainCircuit,
+  CalendarDays,
   ChevronDown,
+  ClipboardList,
+  Clock,
   Cpu,
   Download,
   Globe,
   GraduationCap,
   Layers,
+  ListChecks,
   Menu,
   Network,
   Presentation,
+  Rocket,
   ShieldCheck,
   Sparkles,
   X,
@@ -63,12 +70,16 @@ import {
 import { InternetFlowVisual } from "@/components/lecture/InternetFlowVisual";
 import { OsiModelVisual } from "@/components/lecture/OsiModelVisual";
 import {
+  DatabaseRealisticVisual,
   DnsRealisticVisual,
   DomainHostingRealisticVisual,
+  DynamicRenderingRealisticVisual,
   HtmlCssRealisticVisual,
+  HttpProtocolRealisticVisual,
   IcannIanaRealisticVisual,
   InternetJourneyRealisticVisual,
   JsPhpRealisticVisual,
+  StaticRenderingRealisticVisual,
   TcpIpRealisticVisual,
   WhoisRealisticVisual,
   WordpressRealisticVisual,
@@ -82,6 +93,7 @@ import {
   HackingRealisticVisual,
   MalwareScannerRealisticVisual,
   PhishingRealisticVisual,
+  StuxnetRealisticVisual,
 } from "@/components/lecture/SecurityVisuals";
 import {
   BiosRealisticVisual,
@@ -188,6 +200,10 @@ const OUTLINE: Chapter[] = [
     subs: withPack("web", [
       { id: "html-css", label: "HTML & CSS" },
       { id: "js-php", label: "JavaScript & PHP" },
+      { id: "http-protocol", label: "HTTP Protocol" },
+      { id: "static-rendering", label: "Static Rendering" },
+      { id: "dynamic-rendering", label: "Dynamic Rendering" },
+      { id: "databases", label: "Databases" },
       { id: "wordpress", label: "WordPress" },
       { id: "domains-hosting", label: "Domains & Hosting" },
       { id: "dns", label: "DNS" },
@@ -211,6 +227,7 @@ const OUTLINE: Chapter[] = [
       { id: "dos", label: "DoS Attacks" },
       { id: "common-attacks", label: "Common Attacks" },
       { id: "phishing-vishing", label: "Phishing" },
+      { id: "stuxnet", label: "Case · Stuxnet" },
       { id: "defenses", label: "Defenses" },
     ]),
   },
@@ -578,6 +595,46 @@ function Sidebar({
               <Boxes className="h-3.5 w-3.5" />
             </span>
             <span className="flex-1 truncate font-medium">Computer Anatomy · 3D</span>
+            <ArrowRight className="h-3 w-3 opacity-60 transition-transform group-hover:translate-x-0.5" />
+          </Link>
+          <Link
+            href="/statistics"
+            className="group flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-2.5 py-2 text-[12px] text-neutral-300 transition-colors hover:border-emerald-400/40 hover:bg-emerald-400/10 hover:text-emerald-200"
+          >
+            <span className="flex h-6 w-6 items-center justify-center rounded-md border border-white/10 bg-white/[0.04] text-emerald-300">
+              <BarChart3 className="h-3.5 w-3.5" />
+            </span>
+            <span className="flex-1 truncate font-medium">Statistics course</span>
+            <ArrowRight className="h-3 w-3 opacity-60 transition-transform group-hover:translate-x-0.5" />
+          </Link>
+          <Link
+            href="/ml"
+            className="group flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-2.5 py-2 text-[12px] text-neutral-300 transition-colors hover:border-fuchsia-400/40 hover:bg-fuchsia-400/10 hover:text-fuchsia-200"
+          >
+            <span className="flex h-6 w-6 items-center justify-center rounded-md border border-white/10 bg-white/[0.04] text-fuchsia-300">
+              <BrainCircuit className="h-3.5 w-3.5" />
+            </span>
+            <span className="flex-1 truncate font-medium">ML course</span>
+            <ArrowRight className="h-3 w-3 opacity-60 transition-transform group-hover:translate-x-0.5" />
+          </Link>
+          <Link
+            href="/rust"
+            className="group flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-2.5 py-2 text-[12px] text-neutral-300 transition-colors hover:border-orange-400/40 hover:bg-orange-400/10 hover:text-orange-200"
+          >
+            <span className="flex h-6 w-6 items-center justify-center rounded-md border border-white/10 bg-white/[0.04] text-orange-300">
+              <Rocket className="h-3.5 w-3.5" />
+            </span>
+            <span className="flex-1 truncate font-medium">Rust course</span>
+            <ArrowRight className="h-3 w-3 opacity-60 transition-transform group-hover:translate-x-0.5" />
+          </Link>
+          <Link
+            href="/dsa"
+            className="group flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-2.5 py-2 text-[12px] text-neutral-300 transition-colors hover:border-indigo-400/40 hover:bg-indigo-400/10 hover:text-indigo-200"
+          >
+            <span className="flex h-6 w-6 items-center justify-center rounded-md border border-white/10 bg-white/[0.04] text-indigo-300">
+              <span className="text-[11px]">🧩</span>
+            </span>
+            <span className="flex-1 truncate font-medium">DSA in Rust</span>
             <ArrowRight className="h-3 w-3 opacity-60 transition-transform group-hover:translate-x-0.5" />
           </Link>
           <div className="text-[11px] text-neutral-500">IDIC · Introduction to IT</div>
@@ -989,8 +1046,381 @@ function Welcome() {
         </div>
       </motion.div>
 
+      <CourseInfoCard />
+
       <LessonPack lessonKey="welcome" />
     </Section>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────
+ * Course info — credits, hours, GPA breakdown, grading scale
+ * ────────────────────────────────────────────────────────────── */
+
+function CourseInfoCard() {
+  const stats = [
+    { icon: BookMarked, label: "Credits", value: "3", hint: "credit hours" },
+    { icon: Clock, label: "Total Hours", value: "27h", hint: "classroom contact" },
+    { icon: ClipboardList, label: "Assessments", value: "4", hint: "weighted parts" },
+    { icon: ListChecks, label: "Scale", value: "A–F", hint: "standard 4.0 GPA" },
+  ];
+
+  const gpaParts = [
+    { label: "Attendance", weight: 10, color: "from-sky-400/70 to-sky-300/40", hint: "Show up. Stay on time." },
+    { label: "Assignment", weight: 20, color: "from-emerald-400/70 to-emerald-300/40", hint: "Homework & projects." },
+    { label: "Quiz", weight: 30, color: "from-amber-400/70 to-amber-300/40", hint: "In-class checks." },
+    { label: "Term", weight: 40, color: "from-fuchsia-400/70 to-fuchsia-300/40", hint: "Midterm & final exam." },
+  ];
+
+  const scale = [
+    { grade: "A", range: "85 – 100", gpa: "4.0", note: "Excellent" },
+    { grade: "B+", range: "80 – 84", gpa: "3.5", note: "Very Good" },
+    { grade: "B", range: "70 – 79", gpa: "3.0", note: "Good" },
+    { grade: "C+", range: "65 – 69", gpa: "2.5", note: "Fairly Good" },
+    { grade: "C", range: "50 – 64", gpa: "2.0", note: "Fair" },
+    { grade: "D", range: "45 – 49", gpa: "1.5", note: "Poor" },
+    { grade: "E", range: "40 – 44", gpa: "1.0", note: "Very Poor" },
+    { grade: "F", range: "0 – 39", gpa: "0.0", note: "Fail" },
+  ];
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-60px" }}
+      transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+      className="mt-6 rounded-3xl border border-white/10 bg-white/[0.02] p-6 backdrop-blur-sm sm:p-8"
+    >
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 font-mono text-[11px] tracking-widest text-accent-bright">
+          COURSE INFO
+        </span>
+        <span className="text-[11.5px] text-neutral-500">
+          IDIC · Introduction to Information Technology
+        </span>
+      </div>
+
+      <h2 className="mt-3 text-balance text-2xl font-bold leading-tight tracking-tight text-white sm:text-3xl">
+        Course at a glance
+      </h2>
+      <p className="mt-2 max-w-2xl text-[14px] leading-relaxed text-neutral-400">
+        Three credits, twenty-seven classroom hours, and a clear grading schema
+        so you always know where you stand.
+      </p>
+
+      {/* Quick stats */}
+      <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {stats.map((s) => (
+          <div
+            key={s.label}
+            className="rounded-2xl border border-white/10 bg-white/[0.03] p-4"
+          >
+            <div className="flex items-center gap-2 text-[11px] uppercase tracking-widest text-neutral-500">
+              <s.icon className="h-3.5 w-3.5 text-accent-bright" />
+              {s.label}
+            </div>
+            <div className="mt-2 text-2xl font-bold text-white">{s.value}</div>
+            <div className="mt-0.5 text-[11.5px] text-neutral-500">{s.hint}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* GPA breakdown */}
+      <div className="mt-8 grid gap-6 lg:grid-cols-2">
+        <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
+          <div className="flex items-center justify-between">
+            <h3 className="text-[15px] font-semibold text-white">
+              GPA breakdown
+            </h3>
+            <span className="font-mono text-[11px] tracking-widest text-neutral-500">
+              100%
+            </span>
+          </div>
+          <p className="mt-1 text-[12.5px] text-neutral-500">
+            Your final grade comes from four parts. Each part has a fixed weight.
+          </p>
+          <div className="mt-4 space-y-3">
+            {gpaParts.map((p) => (
+              <div key={p.label}>
+                <div className="flex items-baseline justify-between gap-2">
+                  <div className="text-[13.5px] font-medium text-white">
+                    {p.label}
+                  </div>
+                  <div className="font-mono text-[12.5px] text-neutral-300">
+                    {p.weight}%
+                  </div>
+                </div>
+                <div className="mt-1.5 h-2 overflow-hidden rounded-full border border-white/5 bg-white/[0.03]">
+                  <div
+                    className={cn("h-full rounded-full bg-gradient-to-r", p.color)}
+                    style={{ width: `${p.weight}%` }}
+                  />
+                </div>
+                <div className="mt-1 text-[11.5px] text-neutral-500">
+                  {p.hint}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Standard scoring scale */}
+        <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
+          <div className="flex items-center justify-between">
+            <h3 className="text-[15px] font-semibold text-white">
+              Standard scoring system
+            </h3>
+            <span className="font-mono text-[11px] tracking-widest text-neutral-500">
+              4.0 GPA
+            </span>
+          </div>
+          <p className="mt-1 text-[12.5px] text-neutral-500">
+            Scores are mapped to letter grades and GPA points as follows.
+          </p>
+          <div className="mt-4 overflow-hidden rounded-xl border border-white/10">
+            <table className="w-full text-left text-[12.5px]">
+              <thead className="bg-white/[0.04] text-neutral-400">
+                <tr>
+                  <th className="px-3 py-2 font-mono text-[10.5px] uppercase tracking-widest">
+                    Grade
+                  </th>
+                  <th className="px-3 py-2 font-mono text-[10.5px] uppercase tracking-widest">
+                    Score
+                  </th>
+                  <th className="px-3 py-2 font-mono text-[10.5px] uppercase tracking-widest">
+                    GPA
+                  </th>
+                  <th className="px-3 py-2 font-mono text-[10.5px] uppercase tracking-widest">
+                    Note
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {scale.map((row, i) => (
+                  <tr
+                    key={row.grade}
+                    className={cn(
+                      "border-t border-white/5",
+                      i % 2 === 0 ? "bg-white/[0.01]" : "bg-transparent",
+                      row.grade === "F" && "text-rose-200",
+                      row.grade === "A" && "text-emerald-200",
+                    )}
+                  >
+                    <td className="px-3 py-2 font-mono font-semibold">
+                      {row.grade}
+                    </td>
+                    <td className="px-3 py-2 text-neutral-300">{row.range}</td>
+                    <td className="px-3 py-2 font-mono text-neutral-200">
+                      {row.gpa}
+                    </td>
+                    <td className="px-3 py-2 text-neutral-400">{row.note}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="mt-3 text-[11.5px] text-neutral-500">
+            A passing final mark is C (50) or higher.
+          </p>
+        </div>
+      </div>
+
+      {/* Exam timetable */}
+      <ExamTimetable />
+    </motion.div>
+  );
+}
+
+function ExamTimetable() {
+  const schedule = [
+    {
+      week: "W1",
+      session: "Session 1",
+      kind: "Class",
+      title: "Welcome · Hardware",
+      topics: "Ch 1 – 2",
+      weight: "—",
+      tone: "muted" as const,
+    },
+    {
+      week: "W2",
+      session: "Session 2",
+      kind: "Class",
+      title: "Hardware · Software",
+      topics: "Ch 2 – 3",
+      weight: "—",
+      tone: "muted" as const,
+    },
+    {
+      week: "W3",
+      session: "Session 3",
+      kind: "Quiz 1",
+      title: "Quiz · Hardware & Software",
+      topics: "Ch 2 – 3",
+      weight: "10%",
+      tone: "quiz" as const,
+    },
+    {
+      week: "W4",
+      session: "Session 4",
+      kind: "Class",
+      title: "Networking & Internet",
+      topics: "Ch 4",
+      weight: "—",
+      tone: "muted" as const,
+    },
+    {
+      week: "W5",
+      session: "Session 5",
+      kind: "Quiz 2",
+      title: "Quiz · Networking",
+      topics: "Ch 4",
+      weight: "10%",
+      tone: "quiz" as const,
+    },
+    {
+      week: "W6",
+      session: "Session 6",
+      kind: "Class",
+      title: "Web Technology",
+      topics: "Ch 5",
+      weight: "—",
+      tone: "muted" as const,
+    },
+    {
+      week: "W7",
+      session: "Session 7",
+      kind: "Quiz 3",
+      title: "Quiz · Web & Security",
+      topics: "Ch 5 – 6",
+      weight: "10%",
+      tone: "quiz" as const,
+    },
+    {
+      week: "W8",
+      session: "Session 8",
+      kind: "Class",
+      title: "Cybersecurity · AI",
+      topics: "Ch 6 – 7",
+      weight: "—",
+      tone: "muted" as const,
+    },
+    {
+      week: "W9",
+      session: "Session 9",
+      kind: "Term Exam",
+      title: "Final Exam · All chapters",
+      topics: "Ch 1 – 8",
+      weight: "40%",
+      tone: "term" as const,
+    },
+  ];
+
+  const toneStyles: Record<
+    "muted" | "quiz" | "term",
+    { row: string; chip: string; dot: string }
+  > = {
+    muted: {
+      row: "",
+      chip: "border-white/10 bg-white/[0.04] text-neutral-400",
+      dot: "bg-neutral-500",
+    },
+    quiz: {
+      row: "bg-amber-400/[0.04]",
+      chip: "border-amber-400/40 bg-amber-400/10 text-amber-200",
+      dot: "bg-amber-300",
+    },
+    term: {
+      row: "bg-fuchsia-400/[0.05]",
+      chip: "border-fuchsia-400/40 bg-fuchsia-400/10 text-fuchsia-200",
+      dot: "bg-fuchsia-300",
+    },
+  };
+
+  return (
+    <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.02] p-5">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <CalendarDays className="h-4 w-4 text-accent-bright" />
+          <h3 className="text-[15px] font-semibold text-white">
+            Exam timetable
+          </h3>
+        </div>
+        <div className="flex flex-wrap items-center gap-2 text-[11px]">
+          <span className="rounded-full border border-amber-400/40 bg-amber-400/10 px-2 py-0.5 font-mono tracking-widest text-amber-200">
+            QUIZ · 3× 10%
+          </span>
+          <span className="rounded-full border border-fuchsia-400/40 bg-fuchsia-400/10 px-2 py-0.5 font-mono tracking-widest text-fuchsia-200">
+            TERM · 40%
+          </span>
+        </div>
+      </div>
+      <p className="mt-1 text-[12.5px] text-neutral-500">
+        Nine sessions over 27 hours. Three quizzes along the way and one term
+        exam at the end.
+      </p>
+
+      <div className="mt-4 overflow-x-auto rounded-xl border border-white/10">
+        <table className="w-full min-w-[560px] text-left text-[12.5px]">
+          <thead className="bg-white/[0.04] text-neutral-400">
+            <tr>
+              <th className="px-3 py-2 font-mono text-[10.5px] uppercase tracking-widest">
+                Week
+              </th>
+              <th className="px-3 py-2 font-mono text-[10.5px] uppercase tracking-widest">
+                Session
+              </th>
+              <th className="px-3 py-2 font-mono text-[10.5px] uppercase tracking-widest">
+                Event
+              </th>
+              <th className="px-3 py-2 font-mono text-[10.5px] uppercase tracking-widest">
+                Topic
+              </th>
+              <th className="px-3 py-2 font-mono text-[10.5px] uppercase tracking-widest">
+                Covers
+              </th>
+              <th className="px-3 py-2 text-right font-mono text-[10.5px] uppercase tracking-widest">
+                Weight
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {schedule.map((row) => {
+              const t = toneStyles[row.tone];
+              return (
+                <tr key={row.session} className={cn("border-t border-white/5", t.row)}>
+                  <td className="px-3 py-2 font-mono text-neutral-300">
+                    {row.week}
+                  </td>
+                  <td className="px-3 py-2 text-neutral-300">{row.session}</td>
+                  <td className="px-3 py-2">
+                    <span
+                      className={cn(
+                        "inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 font-mono text-[10.5px] tracking-widest",
+                        t.chip,
+                      )}
+                    >
+                      <span className={cn("h-1.5 w-1.5 rounded-full", t.dot)} />
+                      {row.kind.toUpperCase()}
+                    </span>
+                  </td>
+                  <td className="px-3 py-2 text-white">{row.title}</td>
+                  <td className="px-3 py-2 text-neutral-400">{row.topics}</td>
+                  <td className="px-3 py-2 text-right font-mono text-neutral-200">
+                    {row.weight}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      <p className="mt-3 text-[11.5px] text-neutral-500">
+        Exact dates will be confirmed in class. Missed quizzes cannot be re-taken
+        without written approval.
+      </p>
+    </div>
   );
 }
 
@@ -1298,6 +1728,42 @@ function Web() {
       />
 
       <SubTopic
+        id="http-protocol"
+        emoji="📜"
+        title="HTTP Protocol"
+        caption="HTTP is the request/response language the browser and server speak. Invented by Sir Tim Berners-Lee at CERN in 1989 to share physics papers — it is now the backbone of every website."
+        chips={["Berners-Lee · 1989", "GET / HTTP/1.1", "200 OK · 404 · 500", "HTTP/1.1 → 2 → 3"]}
+        visual={<HttpProtocolRealisticVisual />}
+      />
+
+      <SubTopic
+        id="static-rendering"
+        emoji="🧾"
+        title="Static Rendering"
+        caption="A static page is just a file sitting on disk. The server sends the exact same HTML to everyone, and the browser parses it into a DOM tree, applies CSS, and paints the pixels — no code runs on the server."
+        chips={["file on disk", "parse → DOM → paint", "every visitor identical"]}
+        visual={<StaticRenderingRealisticVisual />}
+      />
+
+      <SubTopic
+        id="dynamic-rendering"
+        emoji="⚙️"
+        title="Dynamic Rendering"
+        caption="A dynamic page is built fresh for every request. The server runs code (Python / PHP / Node), fetches data from a database, fills in a template, and only then sends HTML to the browser."
+        chips={["code runs per request", "reads from DB", "personalised HTML"]}
+        visual={<DynamicRenderingRealisticVisual />}
+      />
+
+      <SubTopic
+        id="databases"
+        emoji="🗃️"
+        title="Databases"
+        caption="A database is where a dynamic site keeps its memory — users, grades, orders. We write small SQL questions and it answers with rows. Postgres and MySQL are the classics; Mongo and Redis are the NoSQL cousins."
+        chips={["rows · columns · tables", "SQL · SELECT / INSERT", "Postgres · MySQL · Mongo"]}
+        visual={<DatabaseRealisticVisual />}
+      />
+
+      <SubTopic
         id="wordpress"
         emoji="🧱"
         title="WordPress"
@@ -1441,6 +1907,21 @@ function Security() {
         caption="Fake emails that trick you into clicking a bad link. Learn to spot the red flags: wrong sender, urgent tone, weird links."
         chips={["check the sender", "urgent = suspicious", "bit.ly = risky"]}
         visual={<PhishingRealisticVisual />}
+      />
+
+      <SubTopic
+        id="stuxnet"
+        emoji="🧬"
+        title="The Sneakiest Virus Ever Made · Stuxnet"
+        caption="Two governments built a tiny computer virus to break a nuclear factory in Iran. The factory had NO internet. So the virus hid inside a USB stick, slipped in with a worker, and quietly broke the machines — while lying to the workers that everything was fine. Same trick could hit a Cambodian factory tomorrow."
+        chips={[
+          "hid inside a USB stick",
+          "factory had NO internet",
+          "broke real machines, not files",
+          "lied to the workers on screen",
+          "about 1,000 machines destroyed",
+        ]}
+        visual={<StuxnetRealisticVisual />}
       />
 
       <SubTopic
