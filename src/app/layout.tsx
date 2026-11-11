@@ -6,6 +6,7 @@ import { Geist, Geist_Mono, Noto_Sans_Khmer } from "next/font/google";
 import "./globals.css";
 import { ChatWidget } from "@/components/chat/ChatWidget";
 import { JsonLd } from "@/components/seo/JsonLd";
+import { ViewAsBanner } from "@/components/portal/ViewAsBanner";
 import {
   GITHUB_URL,
   SITE_DESCRIPTION,
@@ -120,6 +121,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full bg-background text-foreground">
         {children}
+        <ViewAsBanner />
         <ChatWidget />
         {/* Site-wide structured data: identity, organization, and education app info */}
         <JsonLd

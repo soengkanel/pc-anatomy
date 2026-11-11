@@ -1,13 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2, LogOut, Trophy, Radio } from "lucide-react";
-import { StudentIdentityForm } from "@/components/lms/StudentIdentityForm";
-import { useStudentIdentity } from "@/lib/lms-client";
+import { Loader2, Trophy, Radio } from "lucide-react";
 import { useLive, useCountdown, OPTION_STYLES, OPTION_LETTERS } from "./useLive";
 
-export function StudentLive({ initialCode }: { initialCode?: string }) {
-  const { student, loading, save, clear } = useStudentIdentity();
+/** Code entry + gameplay for a signed-in student (rendered inside the student portal). */
+export function LiveJoin({ initialCode }: { initialCode?: string }) {
   const [codeInput, setCodeInput] = useState(initialCode ?? "");
   const [code, setCode] = useState<string | null>(null);
   const [joinError, setJoinError] = useState<string | null>(null);
@@ -25,54 +23,33 @@ export function StudentLive({ initialCode }: { initialCode?: string }) {
     setCode(c);
   };
 
+  if (code && player) return <Play code={code} playerId={player.id} nickname={player.nickname} />;
+
   return (
-    <Shell>
-      {loading ? (
-        <Loader2 className="mx-auto h-6 w-6 animate-spin text-neutral-400" />
-      ) : !student ? (
-        <Card>
-          <h1 className="text-lg font-bold text-white">Join a live quiz</h1>
-          <p className="mb-4 mt-1 text-[13px] text-neutral-400">
-            Register or sign in first so your score is saved to your name.
-          </p>
-          <StudentIdentityForm onSaved={save} />
-        </Card>
-      ) : !code || !player ? (
-        <Card>
-          <div className="flex items-center justify-between text-[12px] text-neutral-400">
-            <span>
-              Signed in as <b className="text-neutral-200">{student.firstName} {student.lastName}</b>
-            </span>
-            <button onClick={clear} className="inline-flex items-center gap-1 hover:text-white">
-              <LogOut className="h-3 w-3" /> Sign out
-            </button>
-          </div>
-          <h1 className="mt-4 text-lg font-bold text-white">Enter the game code</h1>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              void join(codeInput.trim().toUpperCase());
-            }}
-            className="mt-3 flex gap-2"
-          >
-            <input
-              value={codeInput}
-              onChange={(e) => setCodeInput(e.target.value.toUpperCase())}
-              maxLength={6}
-              placeholder="ABC123"
-              autoFocus
-              className="w-full rounded-lg border border-white/10 bg-black/30 px-4 py-3 text-center font-mono text-2xl tracking-[0.3em] text-white outline-none focus:border-violet-400/60"
-            />
-            <button className="rounded-lg border border-violet-400/50 bg-violet-500/25 px-5 text-[14px] font-semibold text-violet-100 hover:bg-violet-500/35">
-              Join
-            </button>
-          </form>
-          {joinError && <p className="mt-3 text-[13px] text-rose-300">{joinError}</p>}
-        </Card>
-      ) : (
-        <Play code={code} playerId={player.id} nickname={player.nickname} />
-      )}
-    </Shell>
+    <Card>
+      <h2 className="text-lg font-bold text-white">Enter the game code</h2>
+      <p className="mt-1 text-[13px] text-neutral-400">Your teacher shows a 6-character code on the screen.</p>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          void join(codeInput.trim().toUpperCase());
+        }}
+        className="mt-3 flex gap-2"
+      >
+        <input
+          value={codeInput}
+          onChange={(e) => setCodeInput(e.target.value.toUpperCase())}
+          maxLength={6}
+          placeholder="ABC123"
+          autoFocus
+          className="w-full rounded-lg border border-white/10 bg-black/30 px-4 py-3 text-center font-mono text-2xl tracking-[0.3em] text-white outline-none focus:border-violet-400/60"
+        />
+        <button className="rounded-lg border border-violet-400/50 bg-violet-500/25 px-5 text-[14px] font-semibold text-violet-100 hover:bg-violet-500/35">
+          Join
+        </button>
+      </form>
+      {joinError && <p className="mt-3 text-[13px] text-rose-300">{joinError}</p>}
+    </Card>
   );
 }
 
@@ -251,14 +228,6 @@ export function Board({
       ))}
       {rows.length === 0 && <li className="text-[13px] text-neutral-500">No scores yet.</li>}
     </ol>
-  );
-}
-
-function Shell({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="min-h-screen bg-background text-foreground">
-      <main className="mx-auto max-w-md px-5 pb-16 pt-10">{children}</main>
-    </div>
   );
 }
 

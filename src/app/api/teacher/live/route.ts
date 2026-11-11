@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db, err, noDb, readJson, str } from "@/lib/api";
-import { requireTeacher } from "@/lib/auth";
+import { getTeacher } from "@/lib/auth";
 import { newCode, questionsFor } from "@/lib/live";
 import { LESSONS } from "@/lib/lecture-data";
 
@@ -8,12 +8,14 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  if (!(await requireTeacher())) return err("Teacher sign-in required.", 401);
+  const teacher = await getTeacher();
+  if (!teacher) return err("Teacher sign-in required.", 401);
   if (!db) return noDb();
   const { rows } = await db.query(
     `select s.code, s.title, s.status, s.created_at,
             (select count(*) from live_players p where p.session_id = s.id)::int as players
-       from live_sessions s order by s.created_at desc limit 20`,
+       from live_sessions s where s.teacher_id = $1 order by s.created_at desc limit 20`,
+    [teacher.id],
   );
   const chapters = Object.entries(LESSONS)
     .filter(([, l]) => l.quiz.length > 0)
@@ -22,7 +24,8 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  if (!(await requireTeacher())) return err("Teacher sign-in required.", 401);
+  const teacher = await getTeacher();
+  if (!teacher) return err("Teacher sign-in required.", 401);
   if (!db) return noDb();
   const b = await readJson(req);
   const chapterKey = str(b?.chapterKey, 80);
@@ -33,9 +36,9 @@ export async function POST(req: Request) {
   for (let i = 0; i < 5; i++) {
     try {
       const { rows } = await db.query<{ code: string }>(
-        `insert into live_sessions (code, chapter_key, title, seconds_per_question)
-         values ($1,$2,$3,$4) returning code`,
-        [newCode(), chapterKey, title, seconds],
+        `insert into live_sessions (code, chapter_key, title, seconds_per_question, teacher_id)
+         values ($1,$2,$3,$4,$5) returning code`,
+        [newCode(), chapterKey, title, seconds, teacher.id],
       );
       return NextResponse.json({ code: rows[0].code });
     } catch (e) {

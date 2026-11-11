@@ -1,50 +1,28 @@
-// The home page of the site. It shows the opening / landing view.
-
+// Route: "/" — the single sign-in page. Students and teachers use the same
+// form; the server decides which portal to send them to. Already signed in?
+// Skip straight to the portal. The public course catalogue lives at /home.
 import type { Metadata } from "next";
-import { CoursesLanding } from "@/components/landing/CoursesLanding";
-import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, absoluteUrl } from "@/lib/site";
+import { redirect } from "next/navigation";
+import { LoginPage } from "@/components/portal/LoginPage";
+import { getSession, getTeacher } from "@/lib/auth";
 
-// Metadata is special Next.js information (title, description) used by the browser tab and search engines.
 export const metadata: Metadata = {
-  title: SITE_TITLE,
-  description: SITE_DESCRIPTION,
-  alternates: { canonical: absoluteUrl("/") },
-  keywords: [
-    "computer anatomy",
-    "PC anatomy",
-    "computer components",
-    "computer parts",
-    "PC components",
-    "computer hardware",
-    "PC assembly",
-    "PC building",
-    "learn computer hardware",
-  ],
-  openGraph: {
-    title: SITE_TITLE,
-    description: SITE_DESCRIPTION,
-    url: absoluteUrl("/"),
-    siteName: SITE_NAME,
-    type: "website",
-    images: [
-      {
-        url: absoluteUrl("/og-image.png"),
-        width: 1200,
-        height: 630,
-        alt: "PC Anatomy — Explore Computer Hardware in 3D",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: SITE_TITLE,
-    description: SITE_DESCRIPTION,
-    images: [absoluteUrl("/og-image.png")],
-  },
+  title: "Sign in — IDIC",
+  description: "Sign in to the IDIC student or teacher portal.",
 };
 
-// This is the main component Next.js renders for the "/" URL. It just displays the LandingPage.
-// (Global structured data — WebSite, Organization, EducationalApplication — lives in layout.tsx.)
-export default function Home() {
-  return <CoursesLanding />;
+export const dynamic = "force-dynamic";
+
+export default async function Root({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string }>;
+}) {
+  const { next } = await searchParams;
+  const teacher = await getTeacher();
+  if (teacher) redirect(`/${teacher.username}/courses`);
+  if ((await getSession())?.role === "student") {
+    redirect(next && /^\/(?![/\\])/.test(next) ? next : "/student");
+  }
+  return <LoginPage next={next} />;
 }

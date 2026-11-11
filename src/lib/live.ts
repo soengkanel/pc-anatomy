@@ -14,6 +14,7 @@ export type SessionRow = {
   current_q: number;
   question_started_at: string | null;
   seconds_per_question: number;
+  teacher_id: string | null;
   created_at: string;
 };
 

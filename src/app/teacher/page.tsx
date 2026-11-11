@@ -1,8 +1,10 @@
-import type { Metadata } from "next";
-import { TeacherDashboard } from "@/components/live/TeacherDashboard";
+// Legacy route: /teacher → the signed-in teacher's own portal.
+import { redirect } from "next/navigation";
+import { getTeacher } from "@/lib/auth";
 
-export const metadata: Metadata = { title: "Teacher — IDIC", robots: { index: false } };
+export const dynamic = "force-dynamic";
 
-export default function TeacherPage() {
-  return <TeacherDashboard />;
+export default async function LegacyTeacher() {
+  const t = await getTeacher();
+  redirect(t ? `/${t.username}/courses` : "/");
 }

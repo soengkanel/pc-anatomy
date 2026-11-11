@@ -16,17 +16,24 @@ import type {
 export function useStudentIdentity(): {
   student: StudentIdentity | null;
   loading: boolean;
+  /** Set while a teacher is viewing as this student (read-only). */
+  viewAs: { teacher: string } | null;
   save: (s: StudentIdentity) => void;
   clear: () => void;
 } {
   const [student, setStudent] = useState<StudentIdentity | null>(null);
   const [loading, setLoading] = useState(true);
+  const [viewAs, setViewAs] = useState<{ teacher: string } | null>(null);
 
   useEffect(() => {
     let alive = true;
     fetch("/api/auth/me", { cache: "no-store" })
       .then((r) => r.json())
-      .then((j: { student: StudentIdentity | null }) => alive && setStudent(j.student ?? null))
+      .then((j: { student: StudentIdentity | null; viewAs?: { teacher: string } | null }) => {
+        if (!alive) return;
+        setStudent(j.student ?? null);
+        setViewAs(j.viewAs ?? null);
+      })
       .catch(() => {})
       .finally(() => alive && setLoading(false));
     return () => {
@@ -37,6 +44,7 @@ export function useStudentIdentity(): {
   return {
     student,
     loading,
+    viewAs,
     save: setStudent,
     clear: () => {
       void fetch("/api/auth/logout", { method: "POST" });

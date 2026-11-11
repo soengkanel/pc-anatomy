@@ -16,6 +16,8 @@ export async function POST(req: Request) {
   if (!studentId || !firstName || !lastName || !classSection) {
     return err("All fields are required.");
   }
+  const reserved = await db.query("select 1 from teachers where lower(username) = lower($1)", [studentId]);
+  if (reserved.rowCount) return err("That Student ID is reserved.");
   if (!/^[A-Za-z0-9]{4,12}$/.test(pin)) {
     return err("PIN must be 4–12 letters or digits.");
   }

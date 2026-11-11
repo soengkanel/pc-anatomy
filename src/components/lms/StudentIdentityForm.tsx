@@ -12,10 +12,13 @@ export function StudentIdentityForm({
   initial,
   onSaved,
   submitLabel,
+  registerOnly,
 }: {
   initial?: StudentIdentity | null;
   onSaved: (s: StudentIdentity) => void;
   submitLabel?: string;
+  /** Hide the Sign in tab (used on the unified login page). */
+  registerOnly?: boolean;
 }) {
   const [mode, setMode] = useState<"register" | "login">(initial ? "login" : "register");
   const [firstName, setFirstName] = useState("");
@@ -51,7 +54,7 @@ export function StudentIdentityForm({
         {mode === "register" ? "Create your student account" : "Sign in"}
       </div>
 
-      <div className="inline-flex rounded-full border border-white/10 bg-white/[0.03] p-0.5 text-[12px]">
+      <div className={`${registerOnly ? "hidden" : "inline-flex"} rounded-full border border-white/10 bg-white/[0.03] p-0.5 text-[12px]`}>
         {(["register", "login"] as const).map((m) => (
           <button
             key={m}

@@ -14,7 +14,9 @@
 
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { getSession } from "@/lib/auth";
+import { writableStudent } from "@/lib/auth";
+import { courseOfKey } from "@/lib/courses";
+import { isChapterOpen } from "@/lib/chapter-locks";
 import { LESSONS } from "@/lib/lecture-data";
 import type {
   QuizAnswer,
@@ -54,9 +56,9 @@ export async function POST(request: Request) {
     );
   }
 
-  const session = await getSession();
-  if (session?.role !== "student") {
-    return NextResponse.json({ error: "Please sign in to submit." }, { status: 401 });
+  const session = await writableStudent();
+  if ("error" in session) {
+    return NextResponse.json({ error: session.error }, { status: session.status });
   }
 
   const chapter = validateChapter(body.chapter);
@@ -73,6 +75,18 @@ export async function POST(request: Request) {
   ]);
   const courseId = courseRes.rows[0]?.id;
   if (!courseId) return NextResponse.json({ error: "Course not found." }, { status: 500 });
+
+  // Students can only submit work for courses the teacher has shared. The real
+  // course comes from the chapter key (DSA / Statistics are filed under it-intro).
+  const gate = await db.query<{ shared: boolean }>("select shared from courses where slug = $1", [
+    courseOfKey(chapter.chapterKey),
+  ]);
+  if (!gate.rows[0]?.shared) {
+    return NextResponse.json({ error: "This course isn't available yet." }, { status: 403 });
+  }
+  if (!(await isChapterOpen(chapter.chapterKey))) {
+    return NextResponse.json({ error: "This chapter is locked. Your teacher will open it." }, { status: 403 });
+  }
 
   const startedAt = typeof body.startedAt === "string" && !isNaN(Date.parse(body.startedAt))
     ? body.startedAt

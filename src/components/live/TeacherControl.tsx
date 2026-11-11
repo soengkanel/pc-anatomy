@@ -6,7 +6,7 @@ import { ArrowLeft, Loader2, Users } from "lucide-react";
 import { useLive, useCountdown, OPTION_LETTERS } from "./useLive";
 import { Board } from "./StudentLive";
 
-export function TeacherControl({ code }: { code: string }) {
+export function TeacherControl({ code, home }: { code: string; home: string }) {
   const { state, offset, notFound } = useLive(code);
   const [authed, setAuthed] = useState<boolean | null>(null);
   const [busy, setBusy] = useState(false);
@@ -33,7 +33,7 @@ export function TeacherControl({ code }: { code: string }) {
   if (authed === false)
     return (
       <Center>
-        <Link href="/teacher" className="text-violet-300 underline">Sign in as teacher</Link> to control this game.
+        <Link href="/" className="text-violet-300 underline">Sign in as teacher</Link> to control this game.
       </Center>
     );
   if (!state || authed === null) return <Center><Loader2 className="h-6 w-6 animate-spin" /></Center>;
@@ -46,7 +46,7 @@ export function TeacherControl({ code }: { code: string }) {
     <div className="min-h-screen bg-background text-foreground">
       <main className="mx-auto max-w-4xl space-y-5 px-6 pb-16 pt-8">
         <div className="flex items-center justify-between">
-          <Link href="/teacher" className="inline-flex items-center gap-1.5 text-[13px] text-neutral-400 hover:text-white">
+          <Link href={home} className="inline-flex items-center gap-1.5 text-[13px] text-neutral-400 hover:text-white">
             <ArrowLeft className="h-4 w-4" /> Dashboard
           </Link>
           <span className="inline-flex items-center gap-1.5 text-[14px] text-neutral-300">

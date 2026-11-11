@@ -103,6 +103,13 @@ import {
   RamRealisticVisual,
   StorageRealisticVisual,
 } from "@/components/lecture/HardwareVisuals";
+import {
+  ChapterGate,
+  ChapterLockIcon,
+  ChapterLocksProvider,
+  useChapterLocks,
+  type ChapterLockProps,
+} from "@/components/lecture/ChapterLocks";
 
 /* ─────────────────────────────────────────────────────────────────
  * Outline — drives the sidebar tree and section anchor ids.
@@ -262,7 +269,7 @@ const ALL_ANCHORS: string[] = OUTLINE.flatMap((c) => [c.id, ...c.subs.map((s) =>
  * Main page
  * ────────────────────────────────────────────────────────────── */
 
-export function LecturePage() {
+export function LecturePage({ locks }: { locks?: ChapterLockProps } = {}) {
   const [activeId, setActiveId] = useState<string>("welcome");
   const [progress, setProgress] = useState(0);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -316,6 +323,7 @@ export function LecturePage() {
   }, [activeId]);
 
   return (
+    <ChapterLocksProvider locks={locks}>
     <LessonSessionProvider>
       <div className="relative min-h-screen bg-background text-foreground">
         {/* Ambient background wash */}
@@ -359,14 +367,14 @@ export function LecturePage() {
           />
 
           <main className="min-w-0 flex-1 px-5 pb-24 pt-16 sm:px-10 lg:pt-6">
-            <Welcome />
-            <Hardware />
-            <Software />
-            <Networking />
-            <Web />
-            <Security />
-            <AI />
-            <Conclusion />
+            <Gated k="welcome"><Welcome /></Gated>
+            <Gated k="hardware"><Hardware /></Gated>
+            <Gated k="software"><Software /></Gated>
+            <Gated k="networking"><Networking /></Gated>
+            <Gated k="web"><Web /></Gated>
+            <Gated k="security"><Security /></Gated>
+            <Gated k="ai"><AI /></Gated>
+            <Gated k="conclusion"><Conclusion /></Gated>
             <PageFooter />
           </main>
         </div>
@@ -374,6 +382,17 @@ export function LecturePage() {
         <LaserPointer />
       </div>
     </LessonSessionProvider>
+    </ChapterLocksProvider>
+  );
+}
+
+/** Wraps one chapter in the teacher-controlled lock (see ChapterLocks.tsx). */
+function Gated({ k, children }: { k: string; children: React.ReactNode }) {
+  const c = OUTLINE.find((x) => x.lessonKey === k)!;
+  return (
+    <ChapterGate chapterKey={k} anchorId={c.id} number={c.number} title={c.label}>
+      {children}
+    </ChapterGate>
   );
 }
 
@@ -432,10 +451,13 @@ function SidebarTree({
   activeChapterId: string;
   onNavigate?: () => void;
 }) {
+  const lock = useChapterLocks();
   return (
     <nav className="space-y-0.5">
       {OUTLINE.map((chapter) => {
-        const isOpen = activeChapterId === chapter.id;
+        // Students shouldn't see inside a locked chapter, not even its topic list.
+        const hidden = lock.enabled && !lock.isOwner && !lock.isOpen(chapter.lessonKey);
+        const isOpen = activeChapterId === chapter.id && !hidden;
         const isChapterActive = activeId === chapter.id;
         return (
           <div key={chapter.id}>
@@ -470,7 +492,8 @@ function SidebarTree({
               >
                 {chapter.label}
               </span>
-              {chapter.subs.length > 0 && (
+              <ChapterLockIcon chapterKey={chapter.lessonKey} title={`Chapter ${chapter.number}: ${chapter.label}`} />
+              {chapter.subs.length > 0 && !hidden && (
                 <ChevronDown
                   className={cn(
                     "h-3.5 w-3.5 text-neutral-500 transition-transform",

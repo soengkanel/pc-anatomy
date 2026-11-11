@@ -1,9 +1,10 @@
-import type { Metadata } from "next";
-import { TeacherControl } from "@/components/live/TeacherControl";
+// Legacy route: /teacher/live/<code> → /{teacher}/live/<code>
+import { redirect } from "next/navigation";
+import { getTeacher } from "@/lib/auth";
 
-export const metadata: Metadata = { title: "Live quiz — IDIC", robots: { index: false } };
+export const dynamic = "force-dynamic";
 
-export default async function TeacherLivePage({ params }: { params: Promise<{ code: string }> }) {
-  const { code } = await params;
-  return <TeacherControl code={code.toUpperCase()} />;
+export default async function LegacyTeacherLive({ params }: { params: Promise<{ code: string }> }) {
+  const [{ code }, t] = [await params, await getTeacher()];
+  redirect(t ? `/${t.username}/live/${code.replace(/[^A-Za-z0-9]/g, "")}` : "/");
 }

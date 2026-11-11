@@ -1,17 +1,18 @@
 import { NextResponse } from "next/server";
 import { db, err, noDb, readJson } from "@/lib/api";
-import { requireTeacher } from "@/lib/auth";
+import { getTeacher } from "@/lib/auth";
 import { loadSession, questionsFor, invalidate, publicState } from "@/lib/live";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function POST(req: Request, ctx: { params: Promise<{ code: string }> }) {
-  if (!(await requireTeacher())) return err("Teacher sign-in required.", 401);
+  const teacher = await getTeacher();
+  if (!teacher) return err("Teacher sign-in required.", 401);
   if (!db) return noDb();
   const { code } = await ctx.params;
   const s = await loadSession(code);
-  if (!s) return err("Session not found.", 404);
+  if (!s || s.teacher_id !== teacher.id) return err("Session not found.", 404);
   const action = (await readJson(req))?.action;
   const total = questionsFor(s.chapter_key).length;
 

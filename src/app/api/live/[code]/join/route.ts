@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db, err, noDb } from "@/lib/api";
-import { getSession } from "@/lib/auth";
+import { writableStudent } from "@/lib/auth";
 import { loadSession, invalidate } from "@/lib/live";
 
 export const runtime = "nodejs";
@@ -8,8 +8,8 @@ export const dynamic = "force-dynamic";
 
 export async function POST(_: Request, ctx: { params: Promise<{ code: string }> }) {
   if (!db) return noDb();
-  const ses = await getSession();
-  if (ses?.role !== "student") return err("Please sign in to join.", 401);
+  const ses = await writableStudent();
+  if ("error" in ses) return err(ses.error, ses.status);
   const { code } = await ctx.params;
   const s = await loadSession(code);
   if (!s) return err("No live quiz with that code.", 404);

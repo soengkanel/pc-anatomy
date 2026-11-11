@@ -1,21 +1,23 @@
 import { NextResponse } from "next/server";
 import { db, publicStudent, type StudentRow } from "@/lib/api";
-import { getSession } from "@/lib/auth";
+import { getTeacher, studentContext } from "@/lib/auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const s = await getSession();
-  if (!s) return NextResponse.json({ student: null, teacher: false });
-  if (s.role === "teacher") return NextResponse.json({ student: null, teacher: true });
-  if (!db) return NextResponse.json({ student: null, teacher: false });
+  const teacher = await getTeacher();
+  const t = teacher ? { username: teacher.username, displayName: teacher.displayName } : null;
+  const ctx = await studentContext();
+  if (!ctx || !db) return NextResponse.json({ student: null, teacher: t, viewAs: null });
   const { rows } = await db.query<StudentRow>(
     "select id, student_id, first_name, last_name, class_section from students where id = $1",
-    [s.sid],
+    [ctx.sid],
   );
   return NextResponse.json({
     student: rows[0] ? publicStudent(rows[0]) : null,
-    teacher: false,
+    teacher: t,
+    // Set while a teacher is looking at the portal as this student (read-only).
+    viewAs: ctx.viewer ? { teacher: ctx.viewer.displayName } : null,
   });
 }
