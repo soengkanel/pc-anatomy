@@ -8,17 +8,15 @@
 //     write is_correct + score + max_score to the database.
 //   • Homework submissions are stored as-is (code + notes). Grading is
 //     added later by a teacher UI (`teacher_score`, `teacher_notes`, etc.).
-//   • Student identity is upserted on the human-readable `student_id`
-//     field, so a student switching browsers keeps their history.
-//   • If Supabase is not configured, the route responds with 503 rather
-//     than crashing — same graceful pattern as the waitlist route.
+//   • The student is taken from the signed session cookie (register /
+//     sign in with Student ID + PIN), never from the request body.
+//   • If the database is not configured, the route responds with 503.
 
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { db } from "@/lib/db";
+import { getSession } from "@/lib/auth";
 import { LESSONS } from "@/lib/lecture-data";
-import { validateStudent } from "@/lib/lms";
 import type {
-  StudentIdentity,
   QuizAnswer,
   ChapterMeta,
 } from "@/lib/lms";
@@ -42,7 +40,6 @@ const MAX_CODE_BYTES = 200_000;   // ~200 kB — plenty for any Rust homework
 const MAX_NOTES_BYTES = 4_000;
 
 export async function POST(request: Request) {
-  // ── 1) Parse body ───────────────────────────────────────────────
   let body: Body;
   try {
     body = (await request.json()) as Body;
@@ -50,207 +47,128 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
   }
 
-  // ── 2) Validate student identity ────────────────────────────────
-  let student: StudentIdentity;
-  try {
-    validateStudent(body.student);
-    student = body.student as StudentIdentity;
-  } catch (e) {
-    return NextResponse.json(
-      { error: e instanceof Error ? e.message : "Invalid student info." },
-      { status: 400 },
-    );
-  }
-
-  // ── 3) Validate chapter meta ────────────────────────────────────
-  const chapter = validateChapter(body.chapter);
-  if (!chapter) {
-    return NextResponse.json({ error: "Invalid chapter info." }, { status: 400 });
-  }
-
-  const kind = body.kind;
-  if (kind !== "quiz" && kind !== "homework") {
-    return NextResponse.json({ error: "Invalid submission kind." }, { status: 400 });
-  }
-
-  // ── 4) Check config ─────────────────────────────────────────────
-  if (!supabase) {
+  if (!db) {
     return NextResponse.json(
       { error: "Submissions are not configured yet. Please try again later." },
       { status: 503 },
     );
   }
 
-  // ── 5) Course lookup ────────────────────────────────────────────
-  const { data: courseRow, error: courseErr } = await supabase
-    .from("courses")
-    .select("id, slug")
-    .eq("slug", chapter.courseSlug)
-    .maybeSingle();
-
-  if (courseErr || !courseRow) {
-    console.error("course lookup failed:", courseErr?.message);
-    return NextResponse.json({ error: "Course not found." }, { status: 500 });
+  const session = await getSession();
+  if (session?.role !== "student") {
+    return NextResponse.json({ error: "Please sign in to submit." }, { status: 401 });
   }
 
-  // ── 6) Upsert student ───────────────────────────────────────────
-  const { data: studentRow, error: studentErr } = await supabase
-    .from("students")
-    .upsert(
-      {
-        student_id: student.studentId.trim(),
-        first_name: student.firstName.trim(),
-        last_name: student.lastName.trim(),
-        class_section: student.classSection.trim(),
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: "student_id" },
-    )
-    .select("id")
-    .single();
-
-  if (studentErr || !studentRow) {
-    console.error("student upsert failed:", studentErr?.message);
-    return NextResponse.json({ error: "Could not save student info." }, { status: 500 });
+  const chapter = validateChapter(body.chapter);
+  if (!chapter) {
+    return NextResponse.json({ error: "Invalid chapter info." }, { status: 400 });
+  }
+  const kind = body.kind;
+  if (kind !== "quiz" && kind !== "homework") {
+    return NextResponse.json({ error: "Invalid submission kind." }, { status: 400 });
   }
 
-  const startedAt = typeof body.startedAt === "string" ? body.startedAt : null;
+  const courseRes = await db.query<{ id: string }>("select id from courses where slug = $1", [
+    chapter.courseSlug,
+  ]);
+  const courseId = courseRes.rows[0]?.id;
+  if (!courseId) return NextResponse.json({ error: "Course not found." }, { status: 500 });
+
+  const startedAt = typeof body.startedAt === "string" && !isNaN(Date.parse(body.startedAt))
+    ? body.startedAt
+    : null;
   const timeSpent =
     typeof body.timeSpentSeconds === "number" && Number.isFinite(body.timeSpentSeconds)
       ? Math.max(0, Math.floor(body.timeSpentSeconds))
       : null;
 
-  // ── 7a) Quiz path ───────────────────────────────────────────────
+  const common = [
+    session.sid, courseId, chapter.chapterKey, chapter.chapterNumber, chapter.chapterTitle,
+    startedAt, timeSpent,
+  ];
+
   if (kind === "quiz") {
     const answers = Array.isArray(body.answers)
       ? (body.answers as unknown[]).filter(isQuizAnswer)
       : [];
-
-    // Look up the answer key from the server-side LESSONS map.
     const lesson = LESSONS[chapter.chapterKey];
-    if (!lesson) {
-      return NextResponse.json(
-        { error: "Unknown chapter." },
-        { status: 400 },
-      );
-    }
+    if (!lesson) return NextResponse.json({ error: "Unknown chapter." }, { status: 400 });
 
+    // Last answer per question wins; ignore out-of-range indexes.
+    const byQ = new Map<number, number>();
+    for (const a of answers) {
+      if (a.questionIndex < lesson.quiz.length) byQ.set(a.questionIndex, a.selectedOption);
+    }
     const maxScore = lesson.quiz.length * 2;
     let score = 0;
-    const scored = answers.map((a) => {
-      const correct = lesson.quiz[a.questionIndex]?.answer === a.selectedOption;
-      if (correct) score += 2;
-      return { ...a, isCorrect: correct };
+    const scored = [...byQ].map(([q, sel]) => {
+      const ok = lesson.quiz[q].answer === sel;
+      if (ok) score += 2;
+      return { q, sel, ok };
     });
 
-    const { data: submissionRow, error: submitErr } = await supabase
-      .from("submissions")
-      .insert({
-        student_id: studentRow.id,
-        course_id: courseRow.id,
-        chapter_key: chapter.chapterKey,
-        chapter_number: chapter.chapterNumber,
-        chapter_title: chapter.chapterTitle,
-        kind: "quiz",
-        status: "submitted",
-        started_at: startedAt,
-        time_spent_seconds: timeSpent,
-        score,
-        max_score: maxScore,
-      })
-      .select("id, submitted_at")
-      .single();
-
-    if (submitErr || !submissionRow) {
-      console.error("submission insert failed:", submitErr?.message);
-      return NextResponse.json({ error: "Could not save submission." }, { status: 500 });
-    }
-
-    if (scored.length > 0) {
-      const rows = scored.map((a) => ({
-        submission_id: submissionRow.id,
-        question_index: a.questionIndex,
-        selected_option: a.selectedOption,
-        is_correct: a.isCorrect,
-      }));
-      const { error: ansErr } = await supabase.from("submission_answers").insert(rows);
-      if (ansErr) {
-        console.error("answers insert failed:", ansErr.message);
-        // Submission is already in the DB; report a partial failure.
-        return NextResponse.json(
-          { error: "Submission saved but answers failed to record. Contact the teacher." },
-          { status: 500 },
+    const client = await db.connect();
+    try {
+      await client.query("begin");
+      const ins = await client.query<{ id: string; submitted_at: string }>(
+        `insert into submissions
+           (student_id, course_id, chapter_key, chapter_number, chapter_title,
+            kind, status, started_at, time_spent_seconds, score, max_score)
+         values ($1,$2,$3,$4,$5,'quiz','submitted',$6,$7,$8,$9)
+         returning id, submitted_at`,
+        [...common, score, maxScore],
+      );
+      const sub = ins.rows[0];
+      for (const a of scored) {
+        await client.query(
+          `insert into submission_answers (submission_id, question_index, selected_option, is_correct)
+           values ($1,$2,$3,$4)`,
+          [sub.id, a.q, a.sel, a.ok],
         );
       }
+      await client.query("commit");
+      return NextResponse.json({ submissionId: sub.id, submittedAt: sub.submitted_at });
+    } catch (e) {
+      await client.query("rollback").catch(() => {});
+      console.error("quiz submission failed:", e);
+      return NextResponse.json({ error: "Could not save submission." }, { status: 500 });
+    } finally {
+      client.release();
     }
-
-    return NextResponse.json(
-      {
-        submissionId: submissionRow.id,
-        submittedAt: submissionRow.submitted_at,
-      },
-      { status: 200 },
-    );
   }
 
-  // ── 7b) Homework path ───────────────────────────────────────────
   const codeContent = typeof body.codeContent === "string" ? body.codeContent : "";
   const codeLanguage =
     typeof body.codeLanguage === "string" && body.codeLanguage.trim() !== ""
       ? body.codeLanguage.trim()
       : "rust";
   const notes = typeof body.notes === "string" ? body.notes : "";
-
   if (codeContent.trim().length === 0) {
-    return NextResponse.json(
-      { error: "Please paste your code before submitting." },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: "Please paste your code before submitting." }, { status: 400 });
   }
-  if (new Blob([codeContent]).size > MAX_CODE_BYTES) {
-    return NextResponse.json(
-      { error: "Your code is too large (200 kB max)." },
-      { status: 400 },
-    );
+  if (Buffer.byteLength(codeContent) > MAX_CODE_BYTES) {
+    return NextResponse.json({ error: "Your code is too large (200 kB max)." }, { status: 400 });
   }
-  if (new Blob([notes]).size > MAX_NOTES_BYTES) {
-    return NextResponse.json(
-      { error: "Notes are too long (4 kB max)." },
-      { status: 400 },
-    );
+  if (Buffer.byteLength(notes) > MAX_NOTES_BYTES) {
+    return NextResponse.json({ error: "Notes are too long (4 kB max)." }, { status: 400 });
   }
-
-  const { data: submissionRow, error: hwErr } = await supabase
-    .from("submissions")
-    .insert({
-      student_id: studentRow.id,
-      course_id: courseRow.id,
-      chapter_key: chapter.chapterKey,
-      chapter_number: chapter.chapterNumber,
-      chapter_title: chapter.chapterTitle,
-      kind: "homework",
-      status: "submitted",
-      started_at: startedAt,
-      time_spent_seconds: timeSpent,
-      code_content: codeContent,
-      code_language: codeLanguage,
-      notes: notes || null,
-    })
-    .select("id, submitted_at")
-    .single();
-
-  if (hwErr || !submissionRow) {
-    console.error("homework insert failed:", hwErr?.message);
+  try {
+    const ins = await db.query<{ id: string; submitted_at: string }>(
+      `insert into submissions
+         (student_id, course_id, chapter_key, chapter_number, chapter_title,
+          kind, status, started_at, time_spent_seconds, code_content, code_language, notes)
+       values ($1,$2,$3,$4,$5,'homework','submitted',$6,$7,$8,$9,$10)
+       returning id, submitted_at`,
+      [...common, codeContent, codeLanguage, notes || null],
+    );
+    return NextResponse.json({
+      submissionId: ins.rows[0].id,
+      submittedAt: ins.rows[0].submitted_at,
+    });
+  } catch (e) {
+    console.error("homework insert failed:", e);
     return NextResponse.json({ error: "Could not save submission." }, { status: 500 });
   }
-
-  return NextResponse.json(
-    {
-      submissionId: submissionRow.id,
-      submittedAt: submissionRow.submitted_at,
-    },
-    { status: 200 },
-  );
 }
 
 // ─────────────────────────────────────────────────────────────────

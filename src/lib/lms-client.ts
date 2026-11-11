@@ -12,56 +12,55 @@ import type {
   SubmissionReceipt,
 } from "@/lib/lms";
 
-const STORAGE_KEY = "idic:student";
-
-function readStorage(): StudentIdentity | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    if (
-      parsed &&
-      typeof parsed.studentId === "string" &&
-      typeof parsed.firstName === "string" &&
-      typeof parsed.lastName === "string" &&
-      typeof parsed.classSection === "string"
-    ) {
-      return parsed as StudentIdentity;
-    }
-  } catch {
-    /* ignore malformed data */
-  }
-  return null;
-}
-
-/** React hook — returns the cached student identity + a setter. */
+/** React hook — current signed-in student (from the session cookie). */
 export function useStudentIdentity(): {
   student: StudentIdentity | null;
+  loading: boolean;
   save: (s: StudentIdentity) => void;
   clear: () => void;
 } {
   const [student, setStudent] = useState<StudentIdentity | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setStudent(readStorage());
+    let alive = true;
+    fetch("/api/auth/me", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((j: { student: StudentIdentity | null }) => alive && setStudent(j.student ?? null))
+      .catch(() => {})
+      .finally(() => alive && setLoading(false));
+    return () => {
+      alive = false;
+    };
   }, []);
 
   return {
     student,
-    save: (s) => {
-      if (typeof window !== "undefined") {
-        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
-      }
-      setStudent(s);
-    },
+    loading,
+    save: setStudent,
     clear: () => {
-      if (typeof window !== "undefined") {
-        window.localStorage.removeItem(STORAGE_KEY);
-      }
+      void fetch("/api/auth/logout", { method: "POST" });
       setStudent(null);
     },
   };
+}
+
+/** Register or sign in. Resolves with the student; throws with a friendly message. */
+export async function authRequest(
+  mode: "register" | "login",
+  body: Record<string, string>,
+): Promise<StudentIdentity> {
+  const res = await fetch(`/api/auth/${mode}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  const j = (await res.json().catch(() => ({}))) as {
+    error?: string;
+    student?: StudentIdentity;
+  };
+  if (!res.ok || !j.student) throw new Error(j.error || "Something went wrong. Try again.");
+  return j.student;
 }
 
 /** POST a submission to the LMS API. Returns the receipt or throws. */

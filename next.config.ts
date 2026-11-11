@@ -3,6 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   reactCompiler: true,
+  output: "standalone",
   images: {
     // Wikimedia Commons is used for the port/networking reference photos in
     // the Explore page's "Key Differences" modal. Special:FilePath resolves

@@ -1,68 +1,95 @@
 "use client";
 
-// Small identity form used before a student can submit a quiz or
-// homework online. The values are cached in localStorage by
-// `useStudentIdentity` so the student only fills this once per browser.
+// Register / sign-in form for students (Student ID + PIN). On success the
+// server sets a signed session cookie and `onSaved` receives the student.
 
 import { useState } from "react";
-import { GraduationCap, IdCard, Check } from "lucide-react";
+import { GraduationCap, IdCard, Check, Loader2 } from "lucide-react";
 import type { StudentIdentity } from "@/lib/lms";
+import { authRequest } from "@/lib/lms-client";
 
 export function StudentIdentityForm({
   initial,
   onSaved,
-  submitLabel = "Save & continue",
+  submitLabel,
 }: {
   initial?: StudentIdentity | null;
   onSaved: (s: StudentIdentity) => void;
   submitLabel?: string;
 }) {
-  const [firstName, setFirstName] = useState(initial?.firstName ?? "");
-  const [lastName, setLastName] = useState(initial?.lastName ?? "");
+  const [mode, setMode] = useState<"register" | "login">(initial ? "login" : "register");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [studentId, setStudentId] = useState(initial?.studentId ?? "");
-  const [classSection, setClassSection] = useState(initial?.classSection ?? "");
+  const [classSection, setClassSection] = useState("");
+  const [pin, setPin] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const values = {
-      firstName: firstName.trim(),
-      lastName: lastName.trim(),
-      studentId: studentId.trim(),
-      classSection: classSection.trim(),
-    };
-    if (!values.firstName || !values.lastName || !values.studentId || !values.classSection) {
-      setError("All four fields are required.");
-      return;
-    }
-    if (Object.values(values).some((v) => v.length > 120)) {
-      setError("One of the fields is too long.");
-      return;
-    }
+    if (busy) return;
     setError(null);
-    onSaved(values);
+    setBusy(true);
+    try {
+      const s =
+        mode === "register"
+          ? await authRequest("register", { firstName, lastName, studentId, classSection, pin })
+          : await authRequest("login", { studentId, pin });
+      onSaved(s);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong.");
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
     <form onSubmit={submit} className="space-y-4">
       <div className="flex items-center gap-2 text-[13px] font-semibold text-white">
         <IdCard className="h-4 w-4 text-violet-300" />
-        Your details
+        {mode === "register" ? "Create your student account" : "Sign in"}
       </div>
-      <p className="text-[12.5px] text-neutral-400">
-        Enter these once. They&rsquo;re saved on this device so you don&rsquo;t need to type them
-        again next time you submit.
-      </p>
+
+      <div className="inline-flex rounded-full border border-white/10 bg-white/[0.03] p-0.5 text-[12px]">
+        {(["register", "login"] as const).map((m) => (
+          <button
+            key={m}
+            type="button"
+            onClick={() => {
+              setMode(m);
+              setError(null);
+            }}
+            className={`rounded-full px-3 py-1 font-medium transition-colors ${
+              mode === m ? "bg-violet-500/30 text-violet-100" : "text-neutral-400 hover:text-white"
+            }`}
+          >
+            {m === "register" ? "Register" : "Sign in"}
+          </button>
+        ))}
+      </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
-        <Field label="First name" value={firstName} onChange={setFirstName} autoFocus />
-        <Field label="Last name" value={lastName} onChange={setLastName} />
-        <Field label="Student ID" value={studentId} onChange={setStudentId} />
+        {mode === "register" && (
+          <>
+            <Field label="First name" value={firstName} onChange={setFirstName} autoFocus />
+            <Field label="Last name" value={lastName} onChange={setLastName} />
+          </>
+        )}
+        <Field label="Student ID" value={studentId} onChange={setStudentId} autoFocus={mode === "login"} />
+        {mode === "register" && (
+          <Field
+            label="Class / Section"
+            value={classSection}
+            onChange={setClassSection}
+            placeholder="e.g. Grade 10 – A"
+          />
+        )}
         <Field
-          label="Class / Section"
-          value={classSection}
-          onChange={setClassSection}
-          placeholder="e.g. Grade 10 – A"
+          label={mode === "register" ? "Choose a PIN (4–12 letters/digits)" : "PIN"}
+          value={pin}
+          onChange={setPin}
+          password
         />
       </div>
 
@@ -75,13 +102,15 @@ export function StudentIdentityForm({
       <div className="flex items-center gap-2 pt-1">
         <button
           type="submit"
-          className="inline-flex items-center gap-1.5 rounded-full border border-violet-400/50 bg-violet-500/25 px-4 py-2 text-[12.5px] font-semibold text-violet-100 transition-colors hover:bg-violet-500/35"
+          disabled={busy}
+          className="inline-flex items-center gap-1.5 rounded-full border border-violet-400/50 bg-violet-500/25 px-4 py-2 text-[12.5px] font-semibold text-violet-100 transition-colors hover:bg-violet-500/35 disabled:opacity-60"
         >
-          <Check className="h-3.5 w-3.5" /> {submitLabel}
+          {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
+          {submitLabel ?? (mode === "register" ? "Register & continue" : "Sign in")}
         </button>
         <span className="text-[11px] text-neutral-500">
           <GraduationCap className="mr-1 inline h-3 w-3" />
-          Only your teacher can see submissions.
+          Your PIN keeps others from using your ID. Don&rsquo;t share it.
         </span>
       </div>
     </form>
@@ -94,18 +123,21 @@ function Field({
   onChange,
   autoFocus,
   placeholder,
+  password,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   autoFocus?: boolean;
   placeholder?: string;
+  password?: boolean;
 }) {
   return (
     <label className="flex flex-col gap-1 text-[12px]">
       <span className="font-medium text-neutral-300">{label}</span>
       <input
-        type="text"
+        type={password ? "password" : "text"}
+        autoComplete={password ? "current-password" : "off"}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         autoFocus={autoFocus}
