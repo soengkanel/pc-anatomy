@@ -7,6 +7,7 @@ import { useState } from "react";
 import { GraduationCap, IdCard, Check, Loader2 } from "lucide-react";
 import type { StudentIdentity } from "@/lib/lms";
 import { authRequest } from "@/lib/lms-client";
+import { SHIFTS, TEAMS, classCode } from "@/lib/classes";
 
 export function StudentIdentityForm({
   initial,
@@ -24,7 +25,8 @@ export function StudentIdentityForm({
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [studentId, setStudentId] = useState(initial?.studentId ?? "");
-  const [classSection, setClassSection] = useState("");
+  const [team, setTeam] = useState("");
+  const [shift, setShift] = useState("");
   const [pin, setPin] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -35,6 +37,10 @@ export function StudentIdentityForm({
     setError(null);
     setBusy(true);
     try {
+      if (mode === "register" && (!team || !shift)) {
+        throw new Error("Choose your team and shift.");
+      }
+      const classSection = team && shift ? classCode(Number(team), Number(shift)) : "";
       const s =
         mode === "register"
           ? await authRequest("register", { firstName, lastName, studentId, classSection, pin })
@@ -81,12 +87,39 @@ export function StudentIdentityForm({
         )}
         <Field label="Student ID" value={studentId} onChange={setStudentId} autoFocus={mode === "login"} />
         {mode === "register" && (
-          <Field
-            label="Class / Section"
-            value={classSection}
-            onChange={setClassSection}
-            placeholder="e.g. Grade 10 – A"
-          />
+          <div className="flex flex-col gap-1 text-[12px]">
+            <span className="font-medium text-neutral-300">
+              Class {team && shift ? <span className="font-mono text-violet-300">· {classCode(Number(team), Number(shift))}</span> : null}
+            </span>
+            <div className="grid grid-cols-2 gap-2">
+              <select
+                value={team}
+                onChange={(e) => setTeam(e.target.value)}
+                aria-label="Team"
+                className="rounded-md border border-white/10 bg-black/30 px-2 py-1.5 text-[13px] text-white outline-none focus:border-violet-400/60"
+              >
+                <option value="">Team…</option>
+                {TEAMS.map((t) => (
+                  <option key={t} value={t}>
+                    Team {t}
+                  </option>
+                ))}
+              </select>
+              <select
+                value={shift}
+                onChange={(e) => setShift(e.target.value)}
+                aria-label="Shift"
+                className="rounded-md border border-white/10 bg-black/30 px-2 py-1.5 text-[13px] text-white outline-none focus:border-violet-400/60"
+              >
+                <option value="">Shift…</option>
+                {SHIFTS.map((s) => (
+                  <option key={s.n} value={s.n}>
+                    Shift {s.n} · {s.short} {s.time}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
         )}
         <Field
           label={mode === "register" ? "Choose a PIN (4–12 letters/digits)" : "PIN"}

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { db } from "@/lib/api";
+import { db, requireViewer } from "@/lib/api";
 import { COURSES, courseUrl } from "@/lib/courses";
 
 export const runtime = "nodejs";
@@ -7,6 +7,8 @@ export const dynamic = "force-dynamic";
 
 /** Courses the teacher has shared, with canonical URLs (title + teacher name only; nothing private). */
 export async function GET() {
+  const denied = await requireViewer();
+  if (denied) return denied;
   const owners = db
     ? (
         await db.query<{ slug: string; username: string; display_name: string }>(

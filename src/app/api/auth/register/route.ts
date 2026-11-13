@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db, err, noDb, readJson, str, publicStudent, type StudentRow } from "@/lib/api";
 import { hashPin, setSession } from "@/lib/auth";
+import { normalizeClass } from "@/lib/classes";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -11,11 +12,10 @@ export async function POST(req: Request) {
   const studentId = str(b?.studentId);
   const firstName = str(b?.firstName);
   const lastName = str(b?.lastName);
-  const classSection = str(b?.classSection);
+  const classSection = normalizeClass(str(b?.classSection) ?? "");
   const pin = typeof b?.pin === "string" ? b.pin : "";
-  if (!studentId || !firstName || !lastName || !classSection) {
-    return err("All fields are required.");
-  }
+  if (!studentId || !firstName || !lastName) return err("All fields are required.");
+  if (!classSection) return err("Choose your team and shift, e.g. T2-S1.");
   const reserved = await db.query("select 1 from teachers where lower(username) = lower($1)", [studentId]);
   if (reserved.rowCount) return err("That Student ID is reserved.");
   if (!/^[A-Za-z0-9]{4,12}$/.test(pin)) {

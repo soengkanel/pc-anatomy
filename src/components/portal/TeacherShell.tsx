@@ -19,6 +19,8 @@ export function TeacherShell({
     { id: "courses", label: "My courses", href: `${base}/courses` },
     { id: "live", label: "Live games", href: `${base}/live` },
     { id: "students", label: "Students", href: `${base}/students` },
+    { id: "teaching", label: "Teaching log", href: `${base}/teaching` },
+    { id: "progress", label: "Progress", href: `${base}/progress` },
     { id: "submissions", label: "Submissions & grading", href: `${base}/submissions` },
     { id: "leaderboard", label: "Leaderboard", href: `${base}/leaderboard` },
   ];

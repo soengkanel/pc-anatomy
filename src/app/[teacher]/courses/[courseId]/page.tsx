@@ -1,12 +1,12 @@
 // Route: /{teacher}/courses/{course_id} — the course itself (lessons, quizzes, exercises).
 // course_id is the course slug: it-intro | rust | dsa | statistics | ml.
 // The page only exists under the teacher who owns the course, and only once they
-// have shared it (the owner can always preview). Once shared, reading is open; submitting a quiz or homework still needs a student sign-in.
+// have shared it (the owner can always preview). Viewing requires a signed-in student or teacher; once shared, any signed-in student can read it.
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { courseMetadata } from "@/lib/course-meta";
 import { visibleOwner } from "@/lib/course-owner";
-import { getTeacher, getViewAs } from "@/lib/auth";
+import { getTeacher, getViewAs, studentContext } from "@/lib/auth";
 import { unlockedChapters } from "@/lib/chapter-locks";
 import { isCourseSlug } from "@/lib/courses";
 
@@ -17,6 +17,10 @@ type P = { params: Promise<{ teacher: string; courseId: string }> };
 async function resolve({ params }: P) {
   const { teacher, courseId } = await params;
   if (!isCourseSlug(courseId)) notFound();
+  // Signed out → sign-in first (student, "view as", or teacher). Nothing is readable anonymously.
+  if (!(await studentContext()) && !(await getTeacher())) {
+    redirect(`/?next=${encodeURIComponent(`/${teacher}/courses/${courseId}`)}`);
+  }
   // Not shared (and viewer isn't the owner) looks exactly like a course that doesn't exist.
   const owner = await visibleOwner(courseId);
   if (!owner) notFound();

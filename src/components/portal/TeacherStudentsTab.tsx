@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useKickOut } from "./PortalShell";
 import { useRouter } from "next/navigation";
 import { Download, Eye, KeyRound, Loader2 } from "lucide-react";
+import { SHIFTS, TEAMS, classCode, describeClass, isClassCode } from "@/lib/classes";
 
 type S = {
   id: string; student_id: string; first_name: string; last_name: string; class_section: string;
@@ -45,6 +46,20 @@ export function TeacherStudentsTab() {
       setRows((cur) => cur?.map((x) => (x.id === s.id ? { ...x, has_pin: false } : x)) ?? null);
       setMsg(`PIN reset for ${s.student_id}. Ask them to register again with the same ID.`);
     } else setMsg((await r.json().catch(() => ({}))).error ?? "Reset failed.");
+  };
+
+  const setClass = async (s: S, value: string) => {
+    setMsg(null);
+    const r = await fetch(`/api/teacher/students/${s.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ classSection: value }),
+    });
+    const j = await r.json().catch(() => ({}));
+    if (r.ok) {
+      setRows((cur) => cur?.map((x) => (x.id === s.id ? { ...x, class_section: j.classSection } : x)) ?? null);
+      setMsg(`${s.first_name} ${s.last_name} is now in ${j.classSection}.`);
+    } else setMsg(j.error ?? "Could not change the class.");
   };
 
   const viewAs = async (s: S) => {
@@ -91,7 +106,32 @@ export function TeacherStudentsTab() {
                   <span className="ml-2 font-mono text-[11.5px] text-neutral-500">{s.student_id}</span>
                   {!s.has_pin && <span className="ml-2 rounded bg-amber-400/15 px-1.5 py-0.5 text-[10.5px] text-amber-300">PIN reset</span>}
                 </td>
-                <td className="px-3 py-2 text-neutral-300">{s.class_section}</td>
+                <td className="px-3 py-2">
+                  <select
+                    value={isClassCode(s.class_section) ? s.class_section : ""}
+                    onChange={(e) => setClass(s, e.target.value)}
+                    title={describeClass(s.class_section) ?? "Not a team/shift class yet — pick one"}
+                    aria-label={`Class for ${s.first_name} ${s.last_name}`}
+                    className={`rounded-md border bg-black/40 px-2 py-1 font-mono text-[12px] outline-none focus:border-violet-400/60 ${
+                      isClassCode(s.class_section) ? "border-white/10 text-neutral-200" : "border-amber-400/50 text-amber-200"
+                    }`}
+                  >
+                    {!isClassCode(s.class_section) && (
+                      <option value="" disabled>
+                        {s.class_section || "—"} · set class
+                      </option>
+                    )}
+                    {TEAMS.map((t) => (
+                      <optgroup key={t} label={`Team ${t}`}>
+                        {SHIFTS.map((sh) => (
+                          <option key={sh.n} value={classCode(t, sh.n)}>
+                            {classCode(t, sh.n)} · {sh.short} {sh.time}
+                          </option>
+                        ))}
+                      </optgroup>
+                    ))}
+                  </select>
+                </td>
                 <td className="px-3 py-2 text-right font-mono text-violet-200">{s.quiz_pts}<span className="text-neutral-500">/{s.quiz_max}</span></td>
                 <td className="px-3 py-2 text-right font-mono text-amber-200">{s.live_pts}</td>
                 <td className="px-3 py-2 text-right text-neutral-300">{s.submissions}</td>

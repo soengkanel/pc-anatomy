@@ -1,6 +1,7 @@
 import "server-only";
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { getTeacher, studentContext } from "@/lib/auth";
 
 export const err = (error: string, status = 400) =>
   NextResponse.json({ error }, { status });
@@ -39,3 +40,12 @@ export const publicStudent = (r: StudentRow) => ({
   lastName: r.last_name,
   classSection: r.class_section,
 });
+
+/**
+ * Gate for endpoints any signed-in person may use (student, teacher, or a teacher
+ * viewing as a student). Returns a 401 response to return as-is, or null when allowed.
+ */
+export async function requireViewer(): Promise<NextResponse | null> {
+  if ((await studentContext()) || (await getTeacher())) return null;
+  return err("Please sign in.", 401);
+}

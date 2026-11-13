@@ -3,6 +3,7 @@
 
 import { NextResponse } from "next/server";
 import { CHAT_MODELS } from "@/lib/chat/models";
+import { requireViewer } from "@/lib/api";
 
 // These settings tell Next.js to run this route with the Node.js runtime and never cache the result.
 export const runtime = "nodejs";
@@ -64,6 +65,9 @@ function modelPriority(): string[] {
 
 // This runs when the client sends a POST request to /api/chat containing the chat history.
 export async function POST(request: Request) {
+  // Each reply costs AI credits, so only signed-in users may chat.
+  const denied = await requireViewer();
+  if (denied) return denied;
   let body: { messages?: ChatMessage[] };
   try {
     // Read and parse the JSON data that the client sent us.
